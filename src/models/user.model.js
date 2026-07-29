@@ -45,5 +45,17 @@ export class UserModel {
     user.updatedAt = new Date().toISOString()
 
     return user
-  }
+    }
+
+    static async deactivate(id) {
+    const user = users.find(user => user.id === id)
+
+    if (!user) {
+      return null
+    }
+    user.isActive = false
+    user.updatedAt = new Date().toISOString()
+
+    return user
+    }
 }

@@ -122,4 +122,27 @@ static async updateMe(req, res) {
   }
 }
 
+static async deleteMe(req, res) {
+  try {
+    const user = await UserModel.deactivate(req.user.id)
+
+    if (!user) {
+      return res.status(404).json({
+        error: 'User not found'
+      })
+    }
+
+    return res.json({
+      message: 'User deactivated successfully'
+    })
+
+  } catch (err) {
+    console.error(err)
+
+    return res.status(500).json({
+      error: 'Internal server error'
+    })
+  }
+}
+
 }
