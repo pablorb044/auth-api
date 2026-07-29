@@ -1,0 +1,22 @@
+info:
+  name: Login
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:3000/auth/login
+  body:
+    type: json
+    data: |-
+      {
+        "email": "pablo@test.com",
+        "password": "123456"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
