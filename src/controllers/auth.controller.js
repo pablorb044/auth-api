@@ -84,4 +84,42 @@ export class AuthController {
     })
   }
 }
+
+static async updateMe(req, res) {
+  try {
+    const { username, email } = req.body
+
+    // Comprobar si el nuevo email ya existe
+    if (email) {
+      const existingUser = await UserModel.getByEmail(email)
+
+      if (existingUser && existingUser.id !== req.user.id) {
+        return res.status(400).json({
+          error: 'Email already exists'
+        })
+      }
+    }
+
+    const updatedUser = await UserModel.update(req.user.id, {
+      username,
+      email
+    })
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        error: 'User not found'
+      })
+    }
+
+    return res.json(sanitizeUser(updatedUser))
+
+  } catch (err) {
+    console.error(err)
+
+    return res.status(500).json({
+      error: 'Internal server error'
+    })
+  }
+}
+
 }

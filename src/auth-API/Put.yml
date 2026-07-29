@@ -6,6 +6,15 @@ info:
 http:
   method: PUT
   url: http://localhost:3000/auth/me
+  headers:
+    - name: Authorization
+      value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjRiNGM2NzhiLTY1MWYtNDk5Ni04ZDYyLTAyYmQyOTNiNGQwOSIsImVtYWlsIjoibWFyaWFAdGVzdC5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc4NTM0MTAyMCwiZXhwIjoxNzg1MzQ0NjIwfQ.NTynevEr5yUEO7ZFSL8pZ5Vo-hT9Tx7h_S5Huo19HiQ
+  body:
+    type: json
+    data: |-
+      {
+        "email": "pablo@test.com"
+      }
   auth: inherit
 
 settings:

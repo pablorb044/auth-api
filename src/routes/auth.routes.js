@@ -9,3 +9,4 @@ authRouter.post('/login', AuthController.login)
 
 // Ruta protegida
 authRouter.get('/me', authMiddleware, AuthController.me)
+authRouter.put('/me', authMiddleware, AuthController.updateMe)
