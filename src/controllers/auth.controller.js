@@ -37,7 +37,7 @@ export class AuthController {
               errors: err.issues
             })
           }
-
+          console.error(err)
           return res.status(500).json({
             error: 'Internal server error'
           })
