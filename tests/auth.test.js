@@ -95,4 +95,160 @@ it('should reject invalid credentials', async () => {
 
 })
 
+it('should return current user', async () => {
+
+  // Crear usuario
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  // Hacer login
+  const loginResponse = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const token = loginResponse.body.token
+
+  // Obtener usuario autenticado
+  const response = await request(app)
+    .get('/auth/me')
+    .set('Authorization', `Bearer ${token}`)
+
+  expect(response.status).toBe(200)
+  expect(response.body.username).toBe('Pablo')
+  expect(response.body.email).toBe('pablo@test.com')
+
+})
+
+it('should reject request without token', async () => {
+
+  const response = await request(app)
+    .get('/auth/me')
+
+  expect(response.status).toBe(401)
+  expect(response.body.error).toBe('No token provided')
+
+})
+
+it('should reject invalid token', async () => {
+
+  const response = await request(app)
+    .get('/auth/me')
+    .set('Authorization', 'Bearer invalid-token')
+
+  expect(response.status).toBe(401)
+  expect(response.body.error).toBe('Invalid or expired token')
+
+})
+
+it('should update current user', async () => {
+
+  // Register
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  // Login
+  const loginResponse = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const token = loginResponse.body.token
+
+  // Update
+  const response = await request(app)
+    .put('/auth/me')
+    .set('Authorization', `Bearer ${token}`)
+    .send({
+      username: 'PabloRB',
+      email: 'pablorb@test.com'
+    })
+
+  expect(response.status).toBe(200)
+  expect(response.body.username).toBe('PabloRB')
+  expect(response.body.email).toBe('pablorb@test.com')
+
+})
+
+it('should deactivate current user', async () => {
+
+  // Register
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  // Login
+  const loginResponse = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const token = loginResponse.body.token
+
+  // Delete
+  const response = await request(app)
+    .delete('/auth/me')
+    .set('Authorization', `Bearer ${token}`)
+
+  expect(response.status).toBe(200)
+  expect(response.body.message).toBe('User deactivated successfully')
+
+})
+
+it('should reject inactive user', async () => {
+
+  // Register
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  // Login
+  const loginResponse = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const token = loginResponse.body.token
+
+  // Deactivate
+  await request(app)
+    .delete('/auth/me')
+    .set('Authorization', `Bearer ${token}`)
+
+  // Try to access again
+  const response = await request(app)
+    .get('/auth/me')
+    .set('Authorization', `Bearer ${token}`)
+
+  expect(response.status).toBe(401)
+  expect(response.body.error).toBe('User is inactive')
+
+})
+
 })
