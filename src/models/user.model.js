@@ -1,61 +1,52 @@
-import crypto from 'node:crypto'
-
-const users = []
+import { prisma } from '../lib/prisma.js'
 
 export class UserModel {
     static async create({ username, email, passwordHash }) {
-      const newUser = {
-        id: crypto.randomUUID(),
-        username,
-        email,
-        passwordHash,
-        role: 'user',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        isActive: true
-      }
-
-      users.push(newUser)
-      return newUser
+  return prisma.user.create({
+    data: {
+      username,
+      email,
+      passwordHash
     }
+  })
+}
 
     static async getByEmail(email) {
-      return users.find(user => user.email === email)
+  return prisma.user.findUnique({
+    where: {
+      email
     }
+  })
+}
 
     static async getById(id) {
-      return users.find(user => user.id === id)
+  return prisma.user.findUnique({
+    where: {
+      id
     }
+  })
+}
 
-    static async update(id, { username, email }) {
-    const user = users.find(user => user.id === id)
-
-    if (!user) {
-      return null
+static async update(id, { username, email }) {
+  return prisma.user.update({
+    where: {
+      id
+    },
+    data: {
+      username,
+      email
     }
+  })
+}
 
-    if (username !== undefined) {
-      user.username = username
+static async deactivate(id) {
+  return prisma.user.update({
+    where: {
+      id
+    },
+    data: {
+      isActive: false
     }
-
-    if (email !== undefined) {
-      user.email = email
-    }
-
-    user.updatedAt = new Date().toISOString()
-
-    return user
-    }
-
-    static async deactivate(id) {
-    const user = users.find(user => user.id === id)
-
-    if (!user) {
-      return null
-    }
-    user.isActive = false
-    user.updatedAt = new Date().toISOString()
-
-    return user
-    }
+  })
+}
 }

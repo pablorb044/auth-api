@@ -1,8 +1,13 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach, afterAll } from 'vitest'
 import request from 'supertest'
 import { app } from '../src/app.js'
+import { prisma } from '../src/lib/prisma.js'
 
 describe('Auth API', () => {
+
+  beforeEach(async () => {
+  await prisma.user.deleteMany()
+  })
 
   it('should register a new user', async () => {
 
@@ -66,8 +71,6 @@ it('should login successfully', async () => {
   // Assert
   expect(response.status).toBe(200)
   expect(response.body.token).toBeDefined()
-  console.log(response.status)
-  console.log(response.body)
 })
 
 it('should reject invalid credentials', async () => {
@@ -249,6 +252,10 @@ it('should reject inactive user', async () => {
   expect(response.status).toBe(401)
   expect(response.body.error).toBe('User is inactive')
 
+})
+
+afterAll(async () => {
+  await prisma.$disconnect()
 })
 
 })
