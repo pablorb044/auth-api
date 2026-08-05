@@ -9,6 +9,17 @@ describe('Auth API', () => {
   await prisma.user.deleteMany()
   })
 
+  it('should respond to ping', async () => {
+  const response = await request(app).get('/ping')
+
+  expect(response.status).toBe(200)
+  expect(response.body).toEqual({
+    ok: true,
+    service: 'auth-api',
+    version: '1.0.0'
+  })
+})
+
   it('should register a new user', async () => {
 
     const response = await request(app)
@@ -252,6 +263,17 @@ it('should reject inactive user', async () => {
   expect(response.status).toBe(401)
   expect(response.body.error).toBe('User is inactive')
 
+})
+
+it('should respond to root endpoint', async () => {
+  const response = await request(app).get('/')
+
+  expect(response.status).toBe(200)
+  expect(response.body).toEqual({
+    name: 'Auth API',
+    status: 'running',
+    version: '1.0.0'
+  })
 })
 
 afterAll(async () => {

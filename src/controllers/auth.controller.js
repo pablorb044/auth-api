@@ -13,8 +13,8 @@ export class AuthController {
         const { username, email, password } = registerSchema.parse(req.body)
 
         // 1. comprobar si existe usuario
-        const existingUser = await UserModel.getByEmail(email)
-        if (existingUser) {
+        const emailExists = await UserModel.existsByEmail(email)
+        if (emailExists) {
           return res.status(400).json({ error: 'Email already exists' })
         }
 
@@ -86,11 +86,11 @@ export class AuthController {
 
   static async me(req, res) {
   try {
-    const user = await UserModel.getById(req.user.id)
+    const user = await UserModel.getActiveById(req.user.id)
 
     if (!user) {
-      return res.status(404).json({
-        error: 'User not found'
+      return res.status(401).json({
+        error: 'User is inactive'
       })
     }
 
@@ -111,9 +111,9 @@ export class AuthController {
 
       // Comprobar si el nuevo email ya existe
       if (email) {
-        const existingUser = await UserModel.getByEmail(email)
+        const emailExists = await UserModel.existsByEmail(email)
 
-        if (existingUser && existingUser.id !== req.user.id) {
+        if (emailExists && email !== req.user.email) {
           return res.status(400).json({
             error: 'Email already exists'
           })

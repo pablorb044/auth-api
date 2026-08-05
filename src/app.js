@@ -14,5 +14,17 @@ app.use(express.json())
 app.use('/auth', authRouter)
 
 app.get('/ping', (req, res) => {
-  res.json({ ok: true })
+  res.json({
+    ok: true,
+    service: 'auth-api',
+    version: '1.0.0'
+  })
+})
+
+app.get('/', (req, res) => {
+  res.json({
+    name: 'Auth API',
+    status: 'running',
+    version: '1.0.0'
+  })
 })
