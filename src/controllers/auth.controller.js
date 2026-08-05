@@ -37,6 +37,11 @@ export class AuthController {
               errors: err.issues
             })
           }
+          if (err.code === 'P2002') {
+            return res.status(400).json({
+              error: 'Email already exists'
+          })
+}
           console.error(err)
           return res.status(500).json({
             error: 'Internal server error'
@@ -134,7 +139,12 @@ export class AuthController {
           errors: err.issues
         })
       }
-
+      if (err.code === 'P2002') {
+        return res.status(400).json({
+          error: 'Email already exists'
+      })
+}
+      console.error(err)
       return res.status(500).json({
         error: 'Internal server error'
       })
