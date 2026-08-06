@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { login as loginRequest } from '../services/auth.api'
 import { useAuth } from '../hooks/useAuth'
+
 
 function Login() {
 
@@ -18,14 +18,9 @@ function Login() {
 
     try {
 
-      const data = await loginRequest({
-        email,
-        password
-      })
+      await login(email, password)
 
-      login(null, data.token)
-
-      navigate('/profile')
+    navigate('/profile')
 
     } catch (error) {
 

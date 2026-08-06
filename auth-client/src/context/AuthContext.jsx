@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState } from 'react'
 import { saveToken, getToken, removeToken } from '../utils/token'
-import { getProfile } from '../services/auth.api'
+import { login as loginRequest, getProfile } from '../services/auth.api'
+
 
 export const AuthContext = createContext()
 
@@ -9,13 +10,23 @@ export function AuthProvider({ children }) {
 
   const [user, setUser] = useState(null)
 
+  const [loading, setLoading] = useState(true)
+
   const [token, setToken] = useState(getToken())
 
-  const login = (userData, jwt) => {
-    setUser(userData)
-    setToken(jwt)
-    saveToken(jwt)
-  }
+const login = async (email, password) => {
+  const { token } = await loginRequest({
+    email,
+    password
+  })
+
+  saveToken(token)
+  setToken(token)
+
+  const user = await getProfile(token)
+
+  setUser(user)
+}
 
 
   const logout = () => {
@@ -24,19 +35,34 @@ export function AuthProvider({ children }) {
   removeToken()
   }
 
-  useEffect(() => {
+useEffect(() => {
   const loadUser = async () => {
-    if (!token) return
+
+    if (!token) {
+      setLoading(false)
+      return
+    }
 
     try {
+
       const user = await getProfile(token)
+
       setUser(user)
+
     } catch (error) {
+
       logout()
+
+    } finally {
+
+      setLoading(false)
+
     }
   }
+
   loadUser()
-}, [])
+
+}, [token])
 
 
   return (
@@ -44,6 +70,7 @@ export function AuthProvider({ children }) {
       value={{
         user,
         token,
+        loading,
         login,
         logout
       }}
