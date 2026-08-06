@@ -22,10 +22,6 @@ const login = async (email, password) => {
 
   saveToken(token)
   setToken(token)
-
-  const user = await getProfile(token)
-
-  setUser(user)
 }
 
 

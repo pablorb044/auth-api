@@ -1,17 +1,33 @@
-import { useContext } from 'react'
-import { AuthContext } from '../context/AuthContext'
+import { useAuth } from '../hooks/useAuth'
+import { useNavigate } from 'react-router-dom'
 
 function Profile() {
-  const { user } = useContext(AuthContext)
+
+  const { user, logout } = useAuth()
+
+  const navigate = useNavigate()
+
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
+
 
   return (
-    <>
+    <div>
+
       <h1>Profile Page</h1>
 
-      <pre>
-        {JSON.stringify(user, null, 2)}
-      </pre>
-    </>
+      <h2>{user?.username}</h2>
+
+      <p>{user?.email}</p>
+
+      <button onClick={handleLogout}>
+        Logout
+      </button>
+
+    </div>
   )
 }
 
