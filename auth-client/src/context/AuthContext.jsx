@@ -1,7 +1,6 @@
 import { createContext, useEffect, useState } from 'react'
 import { saveToken, getToken, removeToken } from '../utils/token'
-import { login as loginRequest, getProfile } from '../services/auth.api'
-
+import { getProfile } from '../services/auth.api'
 
 export const AuthContext = createContext()
 
@@ -14,15 +13,15 @@ export function AuthProvider({ children }) {
 
   const [token, setToken] = useState(getToken())
 
-const login = async (email, password) => {
-  const { token } = await loginRequest({
-    email,
-    password
-  })
+  const login = async (userData, jwt) => {
 
-  saveToken(token)
-  setToken(token)
-}
+    saveToken(jwt)
+
+    setToken(jwt)
+
+    setUser(userData)
+
+  }
 
 
   const logout = () => {
@@ -31,7 +30,7 @@ const login = async (email, password) => {
   removeToken()
   }
 
-useEffect(() => {
+  useEffect(() => {
   const loadUser = async () => {
 
     if (!token) {
@@ -59,7 +58,6 @@ useEffect(() => {
   loadUser()
 
 }, [token])
-
 
   return (
     <AuthContext.Provider

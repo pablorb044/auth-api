@@ -258,17 +258,23 @@ En desarrollo.
 Actualmente:
 
 - React configurado
+- React Router configurado
 - Axios configurado
-- Login funcionando
-- AuthContext iniciado
+- AuthContext completo
+- JWT persistence
+- Rehidratación de sesión
+- Protected Routes
+- Login
+- Register
+- Logout
+- Profile protegido
 
 Pendiente:
 
-- Rehidratación
-- Protected Routes
-- Logout
-- Register
-- Profile
+- Componentización UI
+- Estilos
+- Edición de perfil
+- Mejoras UX
 
 ---
 

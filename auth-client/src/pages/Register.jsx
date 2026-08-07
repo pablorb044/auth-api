@@ -10,6 +10,7 @@ function Register() {
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
 
 
   const handleSubmit = async (e) => {
@@ -17,6 +18,8 @@ function Register() {
     e.preventDefault()
 
     try {
+
+      setError('')
 
       await register({
         username,
@@ -28,7 +31,10 @@ function Register() {
 
     } catch (error) {
 
-      console.error(error)
+      setError(
+        error.response?.data?.error || 
+        'Error al registrar usuario'
+      )
 
     }
 
@@ -38,15 +44,21 @@ function Register() {
   return (
     <div>
 
-      <h1>Register</h1>
+        <h1>Register</h1>
 
+        {error && (
+          <p>
+            {error}
+          </p>
+        )}
 
-      <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
 
 
         <input
           type="text"
           placeholder="Username"
+          autoComplete="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
@@ -55,6 +67,7 @@ function Register() {
         <input
           type="email"
           placeholder="Email"
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -63,6 +76,7 @@ function Register() {
         <input
           type="password"
           placeholder="Password"
+          autoComplete="new-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />

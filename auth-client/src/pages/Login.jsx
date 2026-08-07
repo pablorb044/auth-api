@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { login as loginRequest, getProfile } from '../services/auth.api'
 
 
 function Login() {
@@ -11,6 +12,7 @@ function Login() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
 
 
   const handleSubmit = async (e) => {
@@ -18,13 +20,29 @@ function Login() {
 
     try {
 
-      await login(email, password)
+      setError('')
+      console.log({
+        email,
+        password
+      })
 
-    navigate('/profile')
+      const data = await loginRequest({
+        email,
+        password
+      })
+
+      const user = await getProfile(data.token)
+
+await login(user, data.token)
+
+navigate('/profile')
 
     } catch (error) {
 
-      console.error(error)
+      setError(
+        error.response?.data?.error ||
+        'Error al iniciar sesión'
+      )
 
     }
   }
@@ -33,13 +51,20 @@ function Login() {
   return (
     <div>
 
-      <h1>Login</h1>
+    <h1>Login</h1>
+
+    {error && (
+      <p>
+        {error}
+      </p>
+    )}
 
       <form onSubmit={handleSubmit}>
 
         <input
           type="email"
           placeholder="Email"
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -48,6 +73,7 @@ function Login() {
         <input
           type="password"
           placeholder="Password"
+          autoComplete="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
