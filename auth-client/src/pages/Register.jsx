@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { register } from '../services/auth.api'
-
+import Input from '../components/ui/Input'
+import Button from '../components/ui/Button'
+import AuthForm from '../components/ui/AuthForm'
+import Page from '../components/ui/Page'
+import Card from '../components/ui/Card'
 
 function Register() {
 
@@ -42,55 +46,47 @@ function Register() {
 
 
   return (
-    <div>
-
-        <h1>Register</h1>
-
-        {error && (
-          <p>
-            {error}
-          </p>
-        )}
-
-        <form onSubmit={handleSubmit}>
-
-
-        <input
-          type="text"
-          placeholder="Username"
-          autoComplete="username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
+<Page>
+  <Card>
+    <AuthForm
+      title="Register"
+      error={error}
+      onSubmit={handleSubmit}
+    >
+          <Input
+            type="text"
+            placeholder="Username"
+            autoComplete="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
 
 
-        <input
-          type="email"
-          placeholder="Email"
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+          <Input
+            type="email"
+            placeholder="Email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
 
-        <input
-          type="password"
-          placeholder="Password"
-          autoComplete="new-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <Input
+            type="password"
+            placeholder="Password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
 
-        <button type="submit">
-          Register
-        </button>
+          <Button type="submit">
+            Register
+          </Button>
 
-
-      </form>
-
-
-    </div>
+      </AuthForm>
+    </Card>
+</Page>
   )
 }
 

@@ -2,7 +2,11 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { login as loginRequest, getProfile } from '../services/auth.api'
-
+import Input from '../components/ui/Input'
+import Button from '../components/ui/Button'
+import AuthForm from '../components/ui/AuthForm'
+import Page from '../components/ui/Page'
+import Card from '../components/ui/Card'
 
 function Login() {
 
@@ -21,10 +25,6 @@ function Login() {
     try {
 
       setError('')
-      console.log({
-        email,
-        password
-      })
 
       const data = await loginRequest({
         email,
@@ -49,43 +49,40 @@ navigate('/profile')
 
 
   return (
-    <div>
 
-    <h1>Login</h1>
+<Page>
+  <Card>
+    <AuthForm
+      title="Login"
+      error={error}
+      onSubmit={handleSubmit}
+    >
 
-    {error && (
-      <p>
-        {error}
-      </p>
-    )}
-
-      <form onSubmit={handleSubmit}>
-
-        <input
-          type="email"
-          placeholder="Email"
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+          <Input
+            type="email"
+            placeholder="Email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
 
-        <input
-          type="password"
-          placeholder="Password"
-          autoComplete="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <Input
+            type="password"
+            placeholder="Password"
+            autoComplete="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
 
-        <button type="submit">
-          Login
-        </button>
+          <Button type="submit">
+            Login
+          </Button>
 
-      </form>
-
-    </div>
+    </AuthForm>
+  </Card>
+</Page>
   )
 }
 
