@@ -1,14 +1,13 @@
 import { useAuth } from '../hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/ui/Button'
-import Page from '../components/ui/Page'
+import ProfileField from '../components/profile/ProfileField.jsx'
+import AppLayout from '../components/layout/AppLayout'
 import Card from '../components/ui/Card'
-import ProfileField from '../components/profile/ProfileField'
 
 function Profile() {
 
   const { user, logout } = useAuth()
-  console.log(user)
 
   const navigate = useNavigate()
 
@@ -18,31 +17,37 @@ function Profile() {
     navigate('/login')
   }
 
+return (
+  <AppLayout>
+    <div className="flex min-h-[calc(100vh-8rem)] w-full items-center justify-center">
+      <Card>
+        <h1 className="mb-6 text-3xl font-semibold text-white">
+          Profile Page
+        </h1>
 
-  return (
-  <Page>
-    <Card>
-      <h1>Profile Page</h1>
-      <ProfileField
-        label="Username"
-        value={user?.username}
-      />
+        <div className="space-y-4">
+          <ProfileField
+            label="Username"
+            value={user?.username}
+          />
 
-      <ProfileField
-        label="Email"
-        value={user?.email}
-      />
+          <ProfileField
+            label="Email"
+            value={user?.email}
+          />
 
-      <ProfileField
-        label="Role"
-        value={user?.role}
-      />
+          <ProfileField
+            label="Role"
+            value={user?.role}
+          />
 
-      <Button onClick={handleLogout}>
-        Logout
-      </Button>
-    </Card>
-  </Page>
+          <Button onClick={handleLogout}>
+            Logout
+          </Button>
+        </div>
+      </Card>
+    </div>
+  </AppLayout>
 )
 }
 

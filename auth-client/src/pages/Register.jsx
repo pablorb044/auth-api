@@ -4,8 +4,7 @@ import { register } from '../services/auth.api'
 import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
 import AuthForm from '../components/ui/AuthForm'
-import Page from '../components/ui/Page'
-import Card from '../components/ui/Card'
+import AuthLayout from '../components/layout/AuthLayout'
 
 function Register() {
 
@@ -46,13 +45,12 @@ function Register() {
 
 
   return (
-<Page>
-  <Card>
-    <AuthForm
-      title="Register"
-      error={error}
-      onSubmit={handleSubmit}
-    >
+    <AuthLayout>
+      <AuthForm
+        title="Register"
+        error={error}
+        onSubmit={handleSubmit}
+      >
           <Input
             type="text"
             placeholder="Username"
@@ -85,8 +83,7 @@ function Register() {
           </Button>
 
       </AuthForm>
-    </Card>
-</Page>
+    </AuthLayout>
   )
 }
 
