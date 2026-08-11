@@ -5,10 +5,16 @@ import {
   Search,
   Bell
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../hooks/useAuth'
+import { useState } from 'react'
 
 function AppLayout({ children }) {
+  const navigate = useNavigate()
+  const { logout } = useAuth()
+
   return (
-    <div className="min-h-screen bg-[#080316] text-white">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
 
       <aside
         className="
@@ -20,7 +26,7 @@ function AppLayout({ children }) {
           flex-col
           border-r
           border-white/10
-          bg-[#0D0620]
+          bg-[var(--bg-secondary)]
         "
       >
 
@@ -51,7 +57,7 @@ function AppLayout({ children }) {
               py-3
               text-sm
               font-medium
-              text-white
+              text-[var(--text-primary)]
               shadow-lg
               shadow-violet-900/20
             "
@@ -68,42 +74,47 @@ function AppLayout({ children }) {
         <div className="space-y-2 border-t border-white/10 p-4">
 
           <button
+            onClick={() => navigate('/settings')}
             className="
-              flex
-              w-full
-              items-center
-              gap-3
-              rounded-xl
-              px-4
-              py-3
-              text-sm
-              text-white/60
-              transition
-              hover:bg-white/5
-              hover:text-white
+                flex
+                w-full
+                items-center
+                gap-3
+                rounded-xl
+                px-4
+                py-3
+                text-sm
+                text-[var(--text-secondary)]
+                transition
+                hover:bg-white/5
+                hover:text-[var(--text-primary)]
             "
-          >
+            >
             <Settings size={18} />
             Settings
-          </button>
+        </button>
 
 
           <button
+            onClick={() => {
+                logout()
+                navigate('/login')
+                }}
             className="
-              flex
-              w-full
-              items-center
-              gap-3
-              rounded-xl
-              px-4
-              py-3
-              text-sm
-              text-white/60
-              transition
-              hover:bg-white/5
-              hover:text-white
+                flex
+                w-full
+                items-center
+                gap-3
+                rounded-xl
+                px-4
+                py-3
+                text-sm
+                text-[var(--text-secondary)]
+                transition
+                hover:bg-white/5
+                hover:text-[var(--text-primary)]
             "
-          >
+        >
             <LogOut size={18} />
             Logout
           </button>
@@ -127,7 +138,7 @@ function AppLayout({ children }) {
             justify-between
             border-b
             border-white/10
-            bg-[#080316]/80
+            bg-[var(--bg-primary)]
             px-8
             backdrop-blur-xl
           "
@@ -151,7 +162,7 @@ function AppLayout({ children }) {
           >
             <Search
               size={17}
-              className="text-white/40"
+              className="text-[var(--text-secondary)]"
             />
 
             <input
@@ -161,9 +172,9 @@ function AppLayout({ children }) {
                 w-full
                 bg-transparent
                 text-sm
-                text-white
+                text-[var(--text-primary)]
                 outline-none
-                placeholder:text-white/30
+                placeholder:text-[var(--text-secondary)]
               "
             />
           </div>
@@ -177,10 +188,10 @@ function AppLayout({ children }) {
               className="
                 rounded-lg
                 p-2
-                text-white/50
+                text-[var(--text-secondary)]
                 transition
                 hover:bg-white/5
-                hover:text-white
+                hover:text-[var(--text-primary)]
               "
             >
               <Bell size={18} />
@@ -219,7 +230,7 @@ function AppLayout({ children }) {
                 P
               </div>
 
-              <span className="text-sm text-white/80">
+              <span className="text-sm text-[var(--text-secondary)]">
                 Pablo
               </span>
 
