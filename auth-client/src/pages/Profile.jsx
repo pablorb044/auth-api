@@ -1,24 +1,25 @@
 import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import { useProfile } from '../hooks/useProfile'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import ProfileField from '../components/profile/ProfileField.jsx'
 import AppLayout from '../components/layout/AppLayout'
 import Card from '../components/ui/Card'
 import Input from '../components/ui/Input'
-import { updateProfile } from '../services/auth.api'
 
 function Profile() {
 
   const { user, token, logout, updateUser } = useAuth()
-
+  const { update, saving, error, success } = useProfile(token, updateUser)
   const [editing, setEditing] = useState(false)
-
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
 
   const [username, setUsername] = useState(user?.username || '')
   const [email, setEmail] = useState(user?.email || '')
+  
+  const hasChanges =
+  username !== user?.username ||
+  email !== user?.email
 
   const navigate = useNavigate()
 
@@ -28,31 +29,20 @@ function Profile() {
     navigate('/login')
   }
 
-  const handleUpdate = async (e) => {
-    e.preventDefault()
+const handleUpdate = async (e) => {
+  e.preventDefault()
 
-    if (saving) return
+  if (!hasChanges || saving) return
 
-    try {
-      setError('')
-      setSaving(true)
+  const updated = await update({
+    username,
+    email
+  })
 
-      const updatedUser = await updateProfile(token, {
-        username,
-        email
-      })
-
-      updateUser(updatedUser)
-      setEditing(false)
-    } catch (error) {
-      setError(
-        error.response?.data?.error ||
-        'Error al actualizar el perfil'
-      )
-    } finally {
-      setSaving(false)
-    }
+  if (updated) {
+    setEditing(false)
   }
+}
 
 return (
   <AppLayout>
@@ -139,7 +129,7 @@ return (
 
               <Button
                 type="submit"
-                disabled={saving}
+                disabled={saving || !hasChanges}
                 className="w-auto"
               >
                 {saving ? 'Saving...' : 'Save changes'}
@@ -151,6 +141,13 @@ return (
             </Button>
           )}
         </form>
+
+        {success && (
+          <p className="mt-4 text-sm text-emerald-400">
+            {success}
+          </p>
+        )
+        }
       </Card>
     </div>
   </AppLayout>
