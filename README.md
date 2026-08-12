@@ -12,31 +12,35 @@ El proyecto está construido como un MVP de autenticación con una arquitectura 
 
 ### Backend
 
-* Registro de usuarios
-* Login con JWT
-* Autenticación mediante Bearer Token
-* Obtener usuario autenticado (`GET /auth/me`)
-* Actualizar perfil (`PUT /auth/me`)
-* Desactivar usuario (`DELETE /auth/me`)
-* Validación de datos con Zod
-* Persistencia de datos con PostgreSQL
-* Manejo de errores de Prisma
-* Tests de integración
+- Registro de usuarios
+- Login con JWT
+- Autenticación mediante Bearer Token
+- Obtener usuario autenticado (`GET /auth/me`)
+- Actualizar perfil (`PUT /auth/me`)
+- Desactivar usuario (`DELETE /auth/me`)
+- Validación de datos con Zod
+- Persistencia de datos con PostgreSQL
+- Manejo de errores de Prisma
+- Tests de integración
 
 ### Frontend
 
-* Login
-* Registro
-* Logout
-* Persistencia de sesión mediante JWT
-* Rehidratación de sesión
-* Rutas protegidas
-* Profile protegido
-* Página de Settings
-* AppLayout con sidebar y header
-* Componentes UI reutilizables
-* Dark / Light mode
-* Persistencia del tema mediante `localStorage`
+- Login
+- Registro
+- Logout
+- Persistencia de sesión mediante JWT
+- Rehidratación de sesión
+- Rutas protegidas
+- Profile protegido mediante autenticación
+- Edición de username y email
+- Cancelación de cambios en el perfil
+- Prevención de peticiones duplicadas
+- Estados de loading, éxito y error
+- Página de Settings
+- AppLayout con sidebar y header
+- Componentes UI reutilizables
+- Dark / Light mode
+- Persistencia del tema mediante `localStorage`
 
 ---
 
@@ -44,30 +48,30 @@ El proyecto está construido como un MVP de autenticación con una arquitectura 
 
 ### Backend
 
-* Node.js
-* Express
-* PostgreSQL
-* Prisma ORM
-* Docker
-* JWT
-* bcrypt
-* Zod
+- Node.js
+- Express
+- PostgreSQL
+- Prisma ORM
+- Docker
+- JWT
+- bcrypt
+- Zod
 
 ### Frontend
 
-* React
-* Vite
-* React Router
-* Axios
-* Context API
-* Tailwind CSS
-* `@tailwindcss/vite`
-* Lucide React
+- React
+- Vite
+- React Router
+- Axios
+- Context API
+- Tailwind CSS
+- `@tailwindcss/vite`
+- Lucide React
 
 ### Testing
 
-* Vitest
-* Supertest
+- Vitest
+- Supertest
 
 ---
 
@@ -154,21 +158,44 @@ Backend API
 
 La autenticación se gestiona mediante `AuthContext`, mientras que las peticiones al backend se centralizan en `services`.
 
+Los hooks encapsulan lógica reutilizable de la aplicación. Por ejemplo, `useProfile` gestiona la actualización del perfil, incluyendo estados de guardado, errores, éxito y prevención de operaciones duplicadas.
+
+### Flujo de actualización del perfil
+
+```text
+Profile.jsx
+    ↓
+useProfile
+    ↓
+auth.api.js
+    ↓
+PUT /auth/me
+    ↓
+AuthController
+    ↓
+UserModel
+    ↓
+Prisma
+    ↓
+PostgreSQL
+```
+
 ---
 
 ## 🎨 UI
 
 El frontend utiliza una interfaz SaaS moderna con:
 
-* Dark mode como tema principal
-* Light mode alternativo
-* Tailwind CSS
-* Componentes reutilizables
-* Lucide React para iconografía
-* Cards con glassmorphism
-* Gradientes violet / purple
-* Variables CSS para el sistema de colores
-* Diseño responsive en evolución
+- Dark mode como tema principal
+- Light mode alternativo
+- Tailwind CSS
+- Componentes reutilizables
+- Lucide React para iconografía
+- Cards con glassmorphism
+- Gradientes violet / purple
+- Variables CSS para el sistema de colores
+- Estados visuales de loading, éxito y error
+- Diseño responsive en evolución
 
 El tema seleccionado se guarda mediante `localStorage` y se mantiene después de recargar la aplicación.
 
@@ -181,8 +208,6 @@ El proyecto está dividido en backend y frontend.
 Se deben ejecutar ambos servidores en terminales separadas.
 
 Asegúrate de que Docker esté iniciado y que PostgreSQL esté disponible antes de ejecutar el backend.
-
----
 
 ### Backend
 
@@ -227,8 +252,6 @@ Backend:
 ```text
 http://localhost:3000
 ```
-
----
 
 ### Frontend
 
@@ -287,54 +310,57 @@ Actualmente existen **10 tests de integración** para comprobar el flujo princip
 
 ### Backend
 
-* ✅ Registro de usuarios
-* ✅ Login mediante JWT
-* ✅ Middleware de autenticación
-* ✅ Consulta de usuario autenticado
-* ✅ Actualización de perfil
-* ✅ Desactivación lógica
-* ✅ Validación con Zod
-* ✅ Tests de integración
-* ✅ PostgreSQL
-* ✅ Prisma ORM
-* ⬜ Refresh Tokens
-* ⬜ Roles y permisos
-* ⬜ Rate Limiting
-* ⬜ Swagger / OpenAPI
+- ✅ Registro de usuarios
+- ✅ Login mediante JWT
+- ✅ Middleware de autenticación
+- ✅ Consulta de usuario autenticado
+- ✅ Actualización de perfil
+- ✅ Desactivación lógica
+- ✅ Validación con Zod
+- ✅ Tests de integración
+- ✅ PostgreSQL
+- ✅ Prisma ORM
+- ⬜ Refresh Tokens
+- ⬜ Roles y permisos
+- ⬜ Rate Limiting
+- ⬜ Swagger / OpenAPI
 
 ### Frontend
 
-* ✅ React + Vite
-* ✅ React Router
-* ✅ Axios
-* ✅ Login
-* ✅ Registro
-* ✅ Logout
-* ✅ AuthContext
-* ✅ Persistencia de sesión
-* ✅ Rutas protegidas
-* ✅ Profile
-* ✅ Settings
-* ✅ AppLayout
-* ✅ Componentización inicial
-* ✅ Tailwind CSS
-* ✅ Lucide React
-* ✅ Dark / Light mode
-* ⬜ Mejorar navegación y routing
-* ⬜ Edición de perfil
-* ⬜ Validaciones frontend
-* ⬜ Estados de loading
-* ⬜ Mejoras UX
-* ⬜ Responsive completo
-* ⬜ Dashboard principal
-* ⬜ Funcionalidades de identidad/verificación
+- ✅ React + Vite
+- ✅ React Router
+- ✅ Axios
+- ✅ Login
+- ✅ Registro
+- ✅ Logout
+- ✅ AuthContext
+- ✅ Persistencia de sesión
+- ✅ Rehidratación de sesión
+- ✅ Rutas protegidas
+- ✅ Profile
+- ✅ Edición de username y email
+- ✅ Cancelación de cambios
+- ✅ Prevención de peticiones duplicadas
+- ✅ Estados de loading, éxito y error
+- ✅ Settings
+- ✅ AppLayout
+- ✅ Componentización inicial
+- ✅ Tailwind CSS
+- ✅ Lucide React
+- ✅ Dark / Light mode
+- ⬜ Mejorar navegación y routing
+- ⬜ Validaciones frontend
+- ⬜ Mejoras UX
+- ⬜ Responsive completo
+- ⬜ Dashboard principal
+- ⬜ Funcionalidades de identidad/verificación
 
 ### DevOps
 
-* ✅ Docker para PostgreSQL
-* ✅ Variables de entorno
-* ⬜ CI/CD
-* ⬜ Despliegue
+- ✅ Docker para PostgreSQL
+- ✅ Variables de entorno
+- ⬜ CI/CD
+- ⬜ Despliegue
 
 ---
 
@@ -342,7 +368,7 @@ Actualmente existen **10 tests de integración** para comprobar el flujo princip
 
 Para conocer la arquitectura, convenciones, estado detallado y próximos objetivos del proyecto:
 
-**→ `PROJECT_GUIDE.md`**
+**→** `PROJECT_GUIDE.md`
 
 El `README.md` contiene principalmente información de instalación, ejecución, arquitectura general y funcionalidades.
 
@@ -354,6 +380,19 @@ El `PROJECT_GUIDE.md` contiene el contexto técnico más detallado para continua
 
 **MVP de autenticación funcional.**
 
-Backend operativo y frontend React estructurado con autenticación, rutas protegidas, Profile, Settings y sistema de temas persistente.
+Backend operativo y frontend React estructurado con:
 
-El siguiente objetivo es reforzar la navegación del frontend y comenzar a ampliar las funcionalidades principales del MVP.
+- Autenticación JWT
+- Persistencia y rehidratación de sesión
+- Rutas protegidas
+- Profile protegido
+- Edición de username y email
+- Actualización persistente mediante API
+- Estados de loading, éxito y error
+- Settings
+- AppLayout
+- Sistema Dark / Light persistente
+- Componentes UI reutilizables
+- Hooks para encapsular lógica de aplicación
+
+El siguiente objetivo es reforzar la navegación del frontend y continuar ampliando las funcionalidades principales del MVP.
