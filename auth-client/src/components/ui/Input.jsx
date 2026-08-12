@@ -3,7 +3,8 @@ function Input({
   placeholder,
   value,
   onChange,
-  autoComplete
+  autoComplete,
+  required = false
 }) {
   return (
     <input
@@ -12,6 +13,7 @@ function Input({
       value={value}
       onChange={onChange}
       autoComplete={autoComplete}
+      required={required}
       className="
         w-full
         rounded-xl

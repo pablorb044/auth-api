@@ -14,34 +14,39 @@ function Register() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
 
   const handleSubmit = async (e) => {
+  e.preventDefault()
 
-    e.preventDefault()
+  if (loading) return
 
-    try {
-
-      setError('')
-
-      await register({
-        username,
-        email,
-        password
-      })
-
-      navigate('/login')
-
-    } catch (error) {
-
-      setError(
-        error.response?.data?.error || 
-        'Error al registrar usuario'
-      )
-
-    }
-
+  if (!username || !email || !password) {
+  setError('Todos los campos son obligatorios')
+  return
   }
+
+  try {
+    setError('')
+    setLoading(true)
+
+    await register({
+      username,
+      email,
+      password
+    })
+
+    navigate('/login')
+  } catch (error) {
+    setError(
+      error.response?.data?.error ||
+      'Error al registrar usuario'
+    )
+  } finally {
+    setLoading(false)
+  }
+}
 
 
   return (
@@ -57,6 +62,7 @@ function Register() {
             autoComplete="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            required
           />
 
 
@@ -66,6 +72,7 @@ function Register() {
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
 
 
@@ -75,11 +82,15 @@ function Register() {
             autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
 
 
-          <Button type="submit">
-            Register
+          <Button
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? 'Registrando...' : 'Register'}
           </Button>
 
       </AuthForm>

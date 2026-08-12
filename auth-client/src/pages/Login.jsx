@@ -15,30 +15,41 @@ function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+  e.preventDefault()
 
-    try {
-      setError('')
+  if (loading) return
 
-      const data = await loginRequest({
-        email,
-        password
-      })
-
-      const user = await getProfile(data.token)
-
-      await login(user, data.token)
-
-      navigate('/profile')
-    } catch (error) {
-      setError(
-        error.response?.data?.error ||
-        'Error al iniciar sesión'
-      )
-    }
+  if (!email || !password) {
+  setError('Email y password son obligatorios')
+  return
   }
+
+  try {
+    setError('')
+    setLoading(true)
+
+    const data = await loginRequest({
+      email,
+      password
+    })
+
+    const user = await getProfile(data.token)
+
+    await login(user, data.token)
+
+    navigate('/profile')
+  } catch (error) {
+    setError(
+      error.response?.data?.error ||
+      'Error al iniciar sesión'
+    )
+  } finally {
+    setLoading(false)
+  }
+}
 
   return (
     <AuthLayout>
@@ -53,6 +64,7 @@ function Login() {
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          required
         />
 
         <Input
@@ -61,10 +73,14 @@ function Login() {
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
 
-        <Button type="submit">
-          Login
+        <Button
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? 'Iniciando sesión...' : 'Login'}
         </Button>
       </AuthForm>
     </AuthLayout>

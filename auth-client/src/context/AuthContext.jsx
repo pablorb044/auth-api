@@ -14,13 +14,10 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(getToken())
 
   const login = async (userData, jwt) => {
-
     saveToken(jwt)
-
     setToken(jwt)
-
     setUser(userData)
-
+    setLoading(false)
   }
 
 
