@@ -2,14 +2,15 @@ function Button({
   children,
   type = 'button',
   onClick,
-  disabled = false
+  disabled = false,
+  className = ''
 }) {
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className="
+      className={`
         w-full
         rounded-xl
         bg-gradient-to-r from-violet-600 to-purple-600
@@ -18,7 +19,8 @@ function Button({
         transition
         hover:from-violet-500 hover:to-purple-500
         disabled:cursor-not-allowed disabled:opacity-50
-      "
+        ${className}
+      `}
     >
       {children}
     </button>

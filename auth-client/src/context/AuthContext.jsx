@@ -27,6 +27,10 @@ export function AuthProvider({ children }) {
   removeToken()
   }
 
+  const updateUser = (updatedUser) => {
+  setUser(updatedUser)
+  }
+
   useEffect(() => {
   const loadUser = async () => {
 
@@ -63,7 +67,8 @@ export function AuthProvider({ children }) {
         token,
         loading,
         login,
-        logout
+        logout,
+        updateUser
       }}
     >
       {children}
