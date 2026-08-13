@@ -48,7 +48,8 @@ export class OrganizationModel {
           id: managerId
         },
         data: {
-          role: 'manager'
+          role: 'manager',
+          teamId: team.id
         }
       })
 

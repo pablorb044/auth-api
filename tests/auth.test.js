@@ -6,6 +6,7 @@ import { prisma } from '../src/lib/prisma.js'
 describe('Auth API', () => {
 
   beforeEach(async () => {
+  await prisma.teamJoinRequest.deleteMany()
   await prisma.team.deleteMany()
   await prisma.organization.deleteMany()
   await prisma.user.deleteMany()
@@ -369,6 +370,221 @@ it('should reject organization creation without authentication', async () => {
     .send({
       organizationName: 'Carnes Paco S.L.',
       teamName: 'Sección de embutidos'
+    })
+
+  expect(response.status).toBe(401)
+  expect(response.body.error).toBe('No token provided')
+})
+
+it('should create a team join request', async () => {
+
+  // Crear manager
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Manager',
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const managerLogin = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const managerToken = managerLogin.body.token
+
+  // Crear organización + team
+  const organizationResponse = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${managerToken}`)
+    .send({
+      organizationName: 'Acme',
+      teamName: 'Engineering'
+    })
+
+  const teamId = organizationResponse.body.team.id
+
+  // Crear usuario que quiere entrar
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const userLogin = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const userToken = userLogin.body.token
+
+  // Solicitar entrada
+  const response = await request(app)
+    .post('/team-join-requests')
+    .set('Authorization', `Bearer ${userToken}`)
+    .send({
+      teamId
+    })
+
+  expect(response.status).toBe(201)
+  expect(response.body.userId).toBeDefined()
+  expect(response.body.teamId).toBe(teamId)
+  expect(response.body.status).toBe('pending')
+})
+
+it('should reject duplicate pending team join request', async () => {
+
+  // Manager
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Manager',
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const managerLogin = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const managerToken = managerLogin.body.token
+
+  const organizationResponse = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${managerToken}`)
+    .send({
+      organizationName: 'Acme',
+      teamName: 'Engineering'
+    })
+
+  const teamId = organizationResponse.body.team.id
+
+  // Usuario
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const userLogin = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const userToken = userLogin.body.token
+
+  // Primera solicitud
+  await request(app)
+    .post('/team-join-requests')
+    .set('Authorization', `Bearer ${userToken}`)
+    .send({
+      teamId
+    })
+
+  // Segunda solicitud
+  const response = await request(app)
+    .post('/team-join-requests')
+    .set('Authorization', `Bearer ${userToken}`)
+    .send({
+      teamId
+    })
+
+  expect(response.status).toBe(400)
+  expect(response.body.error).toBe('Join request already pending')
+})
+
+it('should reject join request for nonexistent team', async () => {
+
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const loginResponse = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const token = loginResponse.body.token
+
+  const response = await request(app)
+    .post('/team-join-requests')
+    .set('Authorization', `Bearer ${token}`)
+    .send({
+      teamId: '00000000-0000-0000-0000-000000000000'
+    })
+
+  expect(response.status).toBe(404)
+  expect(response.body.error).toBe('Team not found')
+})
+
+it('should reject join request when user already belongs to team', async () => {
+
+  // Crear manager
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Manager',
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const managerLogin = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const managerToken = managerLogin.body.token
+
+  const organizationResponse = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${managerToken}`)
+    .send({
+      organizationName: 'Acme',
+      teamName: 'Engineering'
+    })
+
+  const teamId = organizationResponse.body.team.id
+
+  // El manager ya pertenece al team como manager
+  const response = await request(app)
+    .post('/team-join-requests')
+    .set('Authorization', `Bearer ${managerToken}`)
+    .send({
+      teamId
+    })
+
+  expect(response.status).toBe(400)
+  expect(response.body.error).toBe('User already belongs to this team')
+})
+
+it('should reject team join request without authentication', async () => {
+
+  const response = await request(app)
+    .post('/team-join-requests')
+    .send({
+      teamId: '00000000-0000-0000-0000-000000000000'
     })
 
   expect(response.status).toBe(401)
