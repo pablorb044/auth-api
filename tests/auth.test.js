@@ -6,6 +6,8 @@ import { prisma } from '../src/lib/prisma.js'
 describe('Auth API', () => {
 
   beforeEach(async () => {
+  await prisma.team.deleteMany()
+  await prisma.organization.deleteMany()
   await prisma.user.deleteMany()
   })
 
@@ -274,6 +276,103 @@ it('should respond to root endpoint', async () => {
     status: 'running',
     version: '1.0.0'
   })
+})
+
+it('should create an organization and team', async () => {
+
+  // Register
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  // Login
+  const loginResponse = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const token = loginResponse.body.token
+
+  // Create organization
+  const response = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${token}`)
+    .send({
+      organizationName: 'Carnes Paco S.L.',
+      teamName: 'Sección de embutidos'
+    })
+
+  expect(response.status).toBe(201)
+
+  expect(response.body.organization.name).toBe('Carnes Paco S.L.')
+  expect(response.body.team.name).toBe('Sección de embutidos')
+
+  expect(response.body.manager.username).toBe('Pablo')
+  expect(response.body.manager.email).toBe('pablo@test.com')
+  expect(response.body.manager.role).toBe('manager')
+})
+
+it('should reject creating a second team for the same manager', async () => {
+
+  // Register
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  // Login
+  const loginResponse = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const token = loginResponse.body.token
+
+  // First organization/team
+  await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${token}`)
+    .send({
+      organizationName: 'Carnes Paco S.L.',
+      teamName: 'Sección de embutidos'
+    })
+
+  // Second organization/team
+  const response = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${token}`)
+    .send({
+      organizationName: 'Otra Empresa',
+      teamName: 'Otro Equipo'
+    })
+
+  expect(response.status).toBe(400)
+  expect(response.body.error)
+    .toBe('Organization or manager already has a team')
+})
+
+it('should reject organization creation without authentication', async () => {
+
+  const response = await request(app)
+    .post('/organizations')
+    .send({
+      organizationName: 'Carnes Paco S.L.',
+      teamName: 'Sección de embutidos'
+    })
+
+  expect(response.status).toBe(401)
+  expect(response.body.error).toBe('No token provided')
 })
 
 afterAll(async () => {
