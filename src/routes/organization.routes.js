@@ -21,3 +21,9 @@ organizationRouter.get(
   authMiddleware,
   OrganizationController.getMembers
 )
+
+organizationRouter.patch(
+  '/:organizationId',
+  authMiddleware,
+  OrganizationController.update
+)

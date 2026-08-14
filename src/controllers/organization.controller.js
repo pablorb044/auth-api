@@ -1,5 +1,6 @@
 import { createOrganizationSchema } from '../schemas/create-organization.schema.js'
 import { OrganizationModel } from '../models/organization.model.js'
+import { updateOrganizationSchema } from '../schemas/update-organization.schema.js'
 
 export class OrganizationController {
 
@@ -46,46 +47,6 @@ export class OrganizationController {
       })
     }
   }
-
-  static async get(req, res) {
-  try {
-    const { organizationId } = req.params
-    const userId = req.user.id
-
-    const organization =
-      await OrganizationModel.getWithManager(organizationId)
-
-    if (!organization) {
-      return res.status(404).json({
-        error: 'Organization not found'
-      })
-    }
-
-    const user = await prisma.user.findUnique({
-      where: {
-        id: userId
-      }
-    })
-
-    const belongsToOrganization =
-      organization.teams.some(team => team.id === user?.teamId)
-
-    if (!belongsToOrganization) {
-      return res.status(403).json({
-        error: 'You do not belong to this organization'
-      })
-    }
-
-    return res.status(200).json(organization)
-
-  } catch (err) {
-    console.error(err)
-
-    return res.status(500).json({
-      error: 'Internal server error'
-    })
-  }
-}
 
 static async get(req, res) {
   try {
@@ -151,6 +112,58 @@ static async getMembers(req, res) {
     return res.status(200).json(members)
 
   } catch (err) {
+    console.error(err)
+
+    return res.status(500).json({
+      error: 'Internal server error'
+    })
+  }
+}
+
+static async update(req, res) {
+  try {
+    const { organizationId } = req.params
+    const userId = req.user.id
+
+    const { name } = updateOrganizationSchema.parse(req.body)
+
+    const organization =
+      await OrganizationModel.getById(organizationId)
+
+    if (!organization) {
+      return res.status(404).json({
+        error: 'Organization not found'
+      })
+    }
+
+    const user =
+      await OrganizationModel.getUserOrganization(userId)
+
+    if (!user || user.organizationId !== organizationId) {
+      return res.status(403).json({
+        error: 'You do not belong to this organization'
+      })
+    }
+
+    if (user.role !== 'manager') {
+      return res.status(403).json({
+        error: 'Only the organization manager can update it'
+      })
+    }
+
+    const updatedOrganization =
+      await OrganizationModel.update(organizationId, { name })
+
+    return res.status(200).json(updatedOrganization)
+
+  } catch (err) {
+
+    if (err.name === 'ZodError') {
+      return res.status(400).json({
+        errors: err.issues
+      })
+    }
+
     console.error(err)
 
     return res.status(500).json({
