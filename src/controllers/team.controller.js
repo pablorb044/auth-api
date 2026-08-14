@@ -1,41 +1,52 @@
 import { TeamModel } from '../models/team.model.js'
 import { UserModel } from '../models/user.model.js'
 import { updateTeamSchema } from '../schemas/update-team.schema.js'
-
+import { uuidParamSchema } from '../schemas/uuid-param.schema.js'
 
 export class TeamController {
 
-  static async getTeam(req, res) {
-    try {
-      const { teamId } = req.params
-      const userId = req.user.id
+static async getTeam(req, res) {
+  try {
+    const { teamId } = req.params
 
-      const team = await TeamModel.getWithManager(teamId)
+    uuidParamSchema.parse({
+      id: teamId
+    })
 
-      if (!team) {
-        return res.status(404).json({
-          error: 'Team not found'
-        })
-      }
+    const userId = req.user.id
 
-      const user = await UserModel.getById(userId)
+    const team = await TeamModel.getWithManager(teamId)
 
-      if (!user || user.teamId !== teamId) {
-        return res.status(403).json({
-          error: 'You do not belong to this team'
-        })
-      }
-
-      return res.status(200).json(team)
-
-    } catch (err) {
-      console.error(err)
-
-      return res.status(500).json({
-        error: 'Internal server error'
+    if (!team) {
+      return res.status(404).json({
+        error: 'Team not found'
       })
     }
+
+    const user = await UserModel.getById(userId)
+
+    if (!user || user.teamId !== teamId) {
+      return res.status(403).json({
+        error: 'You do not belong to this team'
+      })
+    }
+
+    return res.status(200).json(team)
+
+  } catch (err) {
+    if (err.name === 'ZodError') {
+      return res.status(400).json({
+        errors: err.issues
+      })
+    }
+
+    console.error(err)
+
+    return res.status(500).json({
+      error: 'Internal server error'
+    })
   }
+}
 
   static async getMembers(req, res) {
     try {

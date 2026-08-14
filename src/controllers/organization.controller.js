@@ -1,6 +1,7 @@
 import { createOrganizationSchema } from '../schemas/create-organization.schema.js'
 import { OrganizationModel } from '../models/organization.model.js'
 import { updateOrganizationSchema } from '../schemas/update-organization.schema.js'
+import { uuidParamSchema } from '../schemas/uuid-param.schema.js'
 
 export class OrganizationController {
 
@@ -51,6 +52,11 @@ export class OrganizationController {
 static async get(req, res) {
   try {
     const { organizationId } = req.params
+
+    uuidParamSchema.parse({
+  id: organizationId
+  })
+
     const userId = req.user.id
 
     const organization =
@@ -75,6 +81,12 @@ static async get(req, res) {
     return res.status(200).json(organization)
 
   } catch (err) {
+    if (err.name === 'ZodError') {
+      return res.status(400).json({
+        errors: err.issues
+      })
+    }
+
     console.error(err)
 
     return res.status(500).json({

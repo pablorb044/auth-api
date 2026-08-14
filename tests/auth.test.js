@@ -2466,7 +2466,7 @@ it('should reject getting a nonexistent organization', async () => {
     })
 
   const response = await request(app)
-    .get('/organizations/nonexistent-id')
+    .get('/organizations/00000000-0000-0000-0000-000000000000')
     .set('Authorization', `Bearer ${login.body.token}`)
 
   expect(response.status).toBe(404)
@@ -3610,6 +3610,158 @@ it('should reject inactive user from accessing a team', async () => {
   expect(response.status).toBe(401)
   expect(response.body.error).toBe('User is inactive')
 })
+
+it('should reject an invalid team id when getting a team', async () => {
+
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const login = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const response = await request(app)
+    .get('/teams/not-a-uuid')
+    .set('Authorization', `Bearer ${login.body.token}`)
+
+  expect(response.status).toBe(400)
+})
+
+it('should reject an invalid organization id', async () => {
+
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const login = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const response = await request(app)
+    .get('/organizations/not-a-uuid')
+    .set('Authorization', `Bearer ${login.body.token}`)
+
+  expect(response.status).toBe(400)
+})
+
+it('should reject an invalid team id in join request', async () => {
+
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const login = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const response = await request(app)
+    .post('/team-join-requests')
+    .set('Authorization', `Bearer ${login.body.token}`)
+    .send({
+      teamId: 'not-a-uuid'
+    })
+
+  expect(response.status).toBe(400)
+  expect(response.body.errors).toBeDefined()
+})
+
+it('should reject an empty team name update', async () => {
+
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Manager',
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const login = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const organizationResponse = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${login.body.token}`)
+    .send({
+      organizationName: 'Acme',
+      teamName: 'Engineering'
+    })
+
+  const teamId = organizationResponse.body.team.id
+
+  const response = await request(app)
+    .patch(`/teams/${teamId}`)
+    .set('Authorization', `Bearer ${login.body.token}`)
+    .send({
+      name: ''
+    })
+
+  expect(response.status).toBe(400)
+})
+
+it('should reject an empty organization name update', async () => {
+
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Manager',
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const login = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const organizationResponse = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${login.body.token}`)
+    .send({
+      organizationName: 'Acme',
+      teamName: 'Engineering'
+    })
+
+  const organizationId = organizationResponse.body.organization.id
+
+  const response = await request(app)
+    .patch(`/organizations/${organizationId}`)
+    .set('Authorization', `Bearer ${login.body.token}`)
+    .send({
+      name: ''
+    })
+
+  expect(response.status).toBe(400)
+})
+
+
 
 afterAll(async () => {
   await prisma.$disconnect()
