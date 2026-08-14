@@ -47,4 +47,74 @@ export class TeamModel {
     })
   }
 
+  static async getWithManager(teamId) {
+  return prisma.team.findUnique({
+    where: {
+      id: teamId
+    },
+    include: {
+      manager: {
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          role: true
+        }
+      }
+    }
+  })
+}
+
+static async getMembers(teamId) {
+  return prisma.user.findMany({
+    where: {
+      teamId
+    },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      role: true,
+      createdAt: true
+    },
+    orderBy: {
+      createdAt: 'asc'
+    }
+  })
+}
+
+static async removeMember(userId) {
+  return prisma.user.update({
+    where: {
+      id: userId
+    },
+    data: {
+      teamId: null
+    }
+  })
+}
+
+static async removeMemberFromTeam(teamId, userId) {
+  return prisma.user.updateMany({
+    where: {
+      id: userId,
+      teamId
+    },
+    data: {
+      teamId: null
+    }
+  })
+}
+
+static async updateMemberRole(userId, role) {
+  return prisma.user.update({
+    where: {
+      id: userId
+    },
+    data: {
+      role
+    }
+  })
+}
+
 }
