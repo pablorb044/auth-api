@@ -33,3 +33,9 @@ teamRouter.patch(
   authMiddleware,
   TeamController.updateMemberRole
 )
+
+teamRouter.patch(
+  '/:teamId',
+  authMiddleware,
+  TeamController.update
+)

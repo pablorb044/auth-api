@@ -117,4 +117,15 @@ static async updateMemberRole(userId, role) {
   })
 }
 
+static async update(id, { name }) {
+  return prisma.team.update({
+    where: {
+      id
+    },
+    data: {
+      name
+    }
+  })
+}
+
 }

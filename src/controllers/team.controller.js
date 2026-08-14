@@ -1,5 +1,7 @@
 import { TeamModel } from '../models/team.model.js'
 import { UserModel } from '../models/user.model.js'
+import { updateTeamSchema } from '../schemas/update-team.schema.js'
+
 
 export class TeamController {
 
@@ -210,6 +212,54 @@ static async updateMemberRole(req, res) {
     })
 
   } catch (err) {
+    console.error(err)
+
+    return res.status(500).json({
+      error: 'Internal server error'
+    })
+  }
+}
+
+static async update(req, res) {
+  try {
+    const { teamId } = req.params
+    const userId = req.user.id
+
+    const { name } = updateTeamSchema.parse(req.body)
+
+    const team = await TeamModel.getById(teamId)
+
+    if (!team) {
+      return res.status(404).json({
+        error: 'Team not found'
+      })
+    }
+
+    const user = await UserModel.getById(userId)
+
+    if (!user || user.teamId !== teamId) {
+      return res.status(403).json({
+        error: 'You do not belong to this team'
+      })
+    }
+
+    if (team.managerId !== userId) {
+      return res.status(403).json({
+        error: 'Only the team manager can update it'
+      })
+    }
+
+    const updatedTeam = await TeamModel.update(teamId, { name })
+
+    return res.status(200).json(updatedTeam)
+
+  } catch (err) {
+    if (err.name === 'ZodError') {
+      return res.status(400).json({
+        errors: err.issues
+      })
+    }
+
     console.error(err)
 
     return res.status(500).json({
