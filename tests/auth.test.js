@@ -3472,7 +3472,144 @@ it('should remove pending join requests when deleting a team', async () => {
   expect(joinRequest).toBeNull()
 })
 
+it('should reject inactive user from creating an organization', async () => {
 
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const login = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const token = login.body.token
+
+  await request(app)
+    .delete('/auth/me')
+    .set('Authorization', `Bearer ${token}`)
+
+  const response = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${token}`)
+    .send({
+      organizationName: 'Inactive Org',
+      teamName: 'Inactive Team'
+    })
+
+  expect(response.status).toBe(401)
+  expect(response.body.error).toBe('User is inactive')
+})
+
+it('should reject inactive user from creating a team join request', async () => {
+
+  // Manager activo
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Manager',
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const managerLogin = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const managerToken = managerLogin.body.token
+
+  const organizationResponse = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${managerToken}`)
+    .send({
+      organizationName: 'Acme',
+      teamName: 'Engineering'
+    })
+
+  const teamId = organizationResponse.body.team.id
+
+  // Usuario
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const userLogin = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const userToken = userLogin.body.token
+
+  await request(app)
+    .delete('/auth/me')
+    .set('Authorization', `Bearer ${userToken}`)
+
+  const response = await request(app)
+    .post('/team-join-requests')
+    .set('Authorization', `Bearer ${userToken}`)
+    .send({
+      teamId
+    })
+
+  expect(response.status).toBe(401)
+  expect(response.body.error).toBe('User is inactive')
+})
+
+it('should reject inactive user from accessing a team', async () => {
+
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Manager',
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const login = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const token = login.body.token
+
+  const organizationResponse = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${token}`)
+    .send({
+      organizationName: 'Acme',
+      teamName: 'Engineering'
+    })
+
+  const teamId = organizationResponse.body.team.id
+
+  await request(app)
+    .delete('/auth/me')
+    .set('Authorization', `Bearer ${token}`)
+
+  const response = await request(app)
+    .get(`/teams/${teamId}`)
+    .set('Authorization', `Bearer ${token}`)
+
+  expect(response.status).toBe(401)
+  expect(response.body.error).toBe('User is inactive')
+})
 
 afterAll(async () => {
   await prisma.$disconnect()
