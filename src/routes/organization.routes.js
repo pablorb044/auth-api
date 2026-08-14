@@ -9,3 +9,15 @@ organizationRouter.post(
   authMiddleware,
   OrganizationController.create
 )
+
+organizationRouter.get(
+  '/:organizationId',
+  authMiddleware,
+  OrganizationController.get
+)
+
+organizationRouter.get(
+  '/:organizationId/members',
+  authMiddleware,
+  OrganizationController.getMembers
+)

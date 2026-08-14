@@ -2413,6 +2413,153 @@ it('should reject manager from another team updating a member role', async () =>
   )
 })
 
+it('should return an organization for a team member', async () => {
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Manager',
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const login = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const organizationResponse = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${login.body.token}`)
+    .send({
+      organizationName: 'Acme',
+      teamName: 'Engineering'
+    })
+
+  const organizationId =
+    organizationResponse.body.organization.id
+
+  const response = await request(app)
+    .get(`/organizations/${organizationId}`)
+    .set('Authorization', `Bearer ${login.body.token}`)
+
+  expect(response.status).toBe(200)
+  expect(response.body.id).toBe(organizationId)
+  expect(response.body.team.name).toBe('Engineering')
+})
+
+it('should reject getting a nonexistent organization', async () => {
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const login = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const response = await request(app)
+    .get('/organizations/nonexistent-id')
+    .set('Authorization', `Bearer ${login.body.token}`)
+
+  expect(response.status).toBe(404)
+  expect(response.body.error).toBe('Organization not found')
+})
+
+it('should reject getting an organization for a user from another organization', async () => {
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Manager',
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const managerLogin = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const organizationResponse = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${managerLogin.body.token}`)
+    .send({
+      organizationName: 'Acme',
+      teamName: 'Engineering'
+    })
+
+  const organizationId =
+    organizationResponse.body.organization.id
+
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const userLogin = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const response = await request(app)
+    .get(`/organizations/${organizationId}`)
+    .set('Authorization', `Bearer ${userLogin.body.token}`)
+
+  expect(response.status).toBe(403)
+  expect(response.body.error)
+    .toBe('You do not belong to this organization')
+})
+
+it('should return organization members', async () => {
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Manager',
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const managerLogin = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const organizationResponse = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${managerLogin.body.token}`)
+    .send({
+      organizationName: 'Acme',
+      teamName: 'Engineering'
+    })
+
+  const organizationId =
+    organizationResponse.body.organization.id
+
+  const response = await request(app)
+    .get(`/organizations/${organizationId}/members`)
+    .set('Authorization', `Bearer ${managerLogin.body.token}`)
+
+  expect(response.status).toBe(200)
+  expect(response.body).toHaveLength(1)
+  expect(response.body[0].email).toBe('manager@test.com')
+})
+
 afterAll(async () => {
   await prisma.$disconnect()
 })

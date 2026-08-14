@@ -47,4 +47,116 @@ export class OrganizationController {
     }
   }
 
+  static async get(req, res) {
+  try {
+    const { organizationId } = req.params
+    const userId = req.user.id
+
+    const organization =
+      await OrganizationModel.getWithManager(organizationId)
+
+    if (!organization) {
+      return res.status(404).json({
+        error: 'Organization not found'
+      })
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId
+      }
+    })
+
+    const belongsToOrganization =
+      organization.teams.some(team => team.id === user?.teamId)
+
+    if (!belongsToOrganization) {
+      return res.status(403).json({
+        error: 'You do not belong to this organization'
+      })
+    }
+
+    return res.status(200).json(organization)
+
+  } catch (err) {
+    console.error(err)
+
+    return res.status(500).json({
+      error: 'Internal server error'
+    })
+  }
+}
+
+static async get(req, res) {
+  try {
+    const { organizationId } = req.params
+    const userId = req.user.id
+
+    const organization =
+      await OrganizationModel.getWithTeam(organizationId)
+
+    if (!organization) {
+      return res.status(404).json({
+        error: 'Organization not found'
+      })
+    }
+
+    const user = await OrganizationModel.getUserOrganization(
+      userId
+    )
+
+    if (!user || user.organizationId !== organizationId) {
+      return res.status(403).json({
+        error: 'You do not belong to this organization'
+      })
+    }
+
+    return res.status(200).json(organization)
+
+  } catch (err) {
+    console.error(err)
+
+    return res.status(500).json({
+      error: 'Internal server error'
+    })
+  }
+}
+
+static async getMembers(req, res) {
+  try {
+    const { organizationId } = req.params
+    const userId = req.user.id
+
+    const organization =
+      await OrganizationModel.getById(organizationId)
+
+    if (!organization) {
+      return res.status(404).json({
+        error: 'Organization not found'
+      })
+    }
+
+    const user =
+      await OrganizationModel.getUserOrganization(userId)
+
+    if (!user || user.organizationId !== organizationId) {
+      return res.status(403).json({
+        error: 'You do not belong to this organization'
+      })
+    }
+
+    const members =
+      await OrganizationModel.getMembers(organizationId)
+
+    return res.status(200).json(members)
+
+  } catch (err) {
+    console.error(err)
+
+    return res.status(500).json({
+      error: 'Internal server error'
+    })
+  }
+}
+
 }

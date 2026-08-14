@@ -61,4 +61,92 @@ export class OrganizationModel {
     })
   }
 
+  static async getWithManager(organizationId) {
+  return prisma.organization.findUnique({
+    where: {
+      id: organizationId
+    },
+    include: {
+      teams: {
+        include: {
+          manager: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+              role: true
+            }
+          }
+        }
+      }
+    }
+  })
+}
+
+static async getWithTeam(organizationId) {
+  return prisma.organization.findUnique({
+    where: {
+      id: organizationId
+    },
+    include: {
+      team: {
+        include: {
+          manager: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+              role: true
+            }
+          }
+        }
+      }
+    }
+  })
+}
+
+static async getMembers(organizationId) {
+  return prisma.user.findMany({
+    where: {
+      team: {
+        organizationId
+      }
+    },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      role: true,
+      createdAt: true
+    },
+    orderBy: {
+      createdAt: 'asc'
+    }
+  })
+}
+
+static async getUserOrganization(userId) {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId
+    },
+    include: {
+      team: {
+        select: {
+          organizationId: true
+        }
+      }
+    }
+  })
+
+  if (!user) {
+    return null
+  }
+
+  return {
+    ...user,
+    organizationId: user.team?.organizationId ?? null
+  }
+}
+
 }
