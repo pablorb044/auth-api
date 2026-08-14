@@ -28,6 +28,12 @@ teamRouter.delete(
   TeamController.removeMember
 )
 
+teamRouter.delete(
+  '/:teamId',
+  authMiddleware,
+  TeamController.delete
+)
+
 teamRouter.patch(
   '/:teamId/members/:userId/role',
   authMiddleware,

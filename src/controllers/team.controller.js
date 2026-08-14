@@ -268,4 +268,38 @@ static async update(req, res) {
   }
 }
 
+static async delete(req, res) {
+  try {
+    const { teamId } = req.params
+    const userId = req.user.id
+
+    const team = await TeamModel.getById(teamId)
+
+    if (!team) {
+      return res.status(404).json({
+        error: 'Team not found'
+      })
+    }
+
+    if (team.managerId !== userId) {
+      return res.status(403).json({
+        error: 'Only the team manager can delete the team'
+      })
+    }
+
+    await TeamModel.deleteTeam(teamId)
+
+    return res.status(200).json({
+      message: 'Team deleted successfully'
+    })
+
+  } catch (err) {
+    console.error(err)
+
+    return res.status(500).json({
+      error: 'Internal server error'
+    })
+  }
+}
+
 }

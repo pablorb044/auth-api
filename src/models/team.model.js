@@ -128,4 +128,53 @@ static async update(id, { name }) {
   })
 }
 
+static async deleteTeam(teamId) {
+  return prisma.$transaction(async (tx) => {
+
+    await tx.teamJoinRequest.deleteMany({
+      where: {
+        teamId
+      }
+    })
+
+    const users = await tx.user.findMany({
+      where: {
+        teamId
+      },
+      select: {
+        id: true,
+        role: true
+      }
+    })
+
+    await tx.user.updateMany({
+      where: {
+        teamId
+      },
+      data: {
+        teamId: null
+      }
+    })
+
+    const manager = users.find(user => user.role === 'manager')
+
+    if (manager) {
+      await tx.user.update({
+        where: {
+          id: manager.id
+        },
+        data: {
+          role: 'user'
+        }
+      })
+    }
+
+    return tx.team.delete({
+      where: {
+        id: teamId
+      }
+    })
+  })
+}
+
 }

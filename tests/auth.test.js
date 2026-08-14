@@ -3056,6 +3056,424 @@ it('should reject updating a team with an invalid name', async () => {
   expect(response.body.errors).toBeDefined()
 })
 
+it('should allow the team manager to delete the team', async () => {
+
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Manager',
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const loginResponse = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const managerToken = loginResponse.body.token
+
+  const organizationResponse = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${managerToken}`)
+    .send({
+      organizationName: 'Delete Org',
+      teamName: 'Delete Team'
+    })
+
+  const teamId = organizationResponse.body.team.id
+
+  const response = await request(app)
+    .delete(`/teams/${teamId}`)
+    .set('Authorization', `Bearer ${managerToken}`)
+
+  expect(response.status).toBe(200)
+  expect(response.body.message).toBe('Team deleted successfully')
+})
+
+it('should reject deleting a team for a non-manager member', async () => {
+
+  // Manager
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'DeleteManager',
+      email: 'delete-manager@test.com',
+      password: '123456'
+    })
+
+  const managerLogin = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'delete-manager@test.com',
+      password: '123456'
+    })
+
+  const managerToken = managerLogin.body.token
+
+  // Team
+  const organizationResponse = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${managerToken}`)
+    .send({
+      organizationName: 'Delete Org',
+      teamName: 'Delete Team'
+    })
+
+  const teamId = organizationResponse.body.team.id
+
+  // Employee
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'DeleteMember',
+      email: 'delete-member@test.com',
+      password: '123456'
+    })
+
+  const userLogin = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'delete-member@test.com',
+      password: '123456'
+    })
+
+  const userToken = userLogin.body.token
+
+  // Join request
+  const joinRequestResponse = await request(app)
+    .post('/team-join-requests')
+    .set('Authorization', `Bearer ${userToken}`)
+    .send({
+      teamId
+    })
+
+  const requestId = joinRequestResponse.body.id
+
+  // Approve
+  const approveResponse = await request(app)
+    .patch(`/team-join-requests/${requestId}/approve`)
+    .set('Authorization', `Bearer ${managerToken}`)
+
+  expect(approveResponse.status).toBe(200)
+
+  // Delete attempt as member
+  const response = await request(app)
+    .delete(`/teams/${teamId}`)
+    .set('Authorization', `Bearer ${userToken}`)
+
+  expect(response.status).toBe(403)
+})
+
+it('should reject deleting a team from another team', async () => {
+
+  // Manager 1
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Manager1',
+      email: 'manager1@test.com',
+      password: '123456'
+    })
+
+  const manager1Login = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'manager1@test.com',
+      password: '123456'
+    })
+
+  const manager1Token = manager1Login.body.token
+
+  const organization1 = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${manager1Token}`)
+    .send({
+      organizationName: 'Acme 1',
+      teamName: 'Engineering'
+    })
+
+  const team1Id = organization1.body.team.id
+
+  // Manager 2
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Manager2',
+      email: 'manager2@test.com',
+      password: '123456'
+    })
+
+  const manager2Login = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'manager2@test.com',
+      password: '123456'
+    })
+
+  const manager2Token = manager2Login.body.token
+
+  const organization2 = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${manager2Token}`)
+    .send({
+      organizationName: 'Acme 2',
+      teamName: 'Marketing'
+    })
+
+  const team2Id = organization2.body.team.id
+
+  const response = await request(app)
+    .delete(`/teams/${team1Id}`)
+    .set('Authorization', `Bearer ${manager2Token}`)
+
+  expect(response.status).toBe(403)
+
+  const teamResponse = await request(app)
+    .get(`/teams/${team2Id}`)
+    .set('Authorization', `Bearer ${manager2Token}`)
+
+  expect(teamResponse.status).toBe(200)
+})
+
+it('should reject deleting a nonexistent team', async () => {
+
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'DeleteManager',
+      email: 'delete-manager@test.com',
+      password: '123456'
+    })
+
+  const loginResponse = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'delete-manager@test.com',
+      password: '123456'
+    })
+
+  const managerToken = loginResponse.body.token
+
+  const response = await request(app)
+    .delete('/teams/00000000-0000-0000-0000-000000000000')
+    .set('Authorization', `Bearer ${managerToken}`)
+
+  expect(response.status).toBe(404)
+  expect(response.body.error).toBe('Team not found')
+})
+
+it('should reject deleting a team without authentication', async () => {
+
+  const response = await request(app)
+    .delete('/teams/00000000-0000-0000-0000-000000000000')
+
+  expect(response.status).toBe(401)
+  expect(response.body.error).toBe('No token provided')
+})
+
+it('should clear team membership when deleting a team', async () => {
+
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Manager',
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const managerLogin = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const managerToken = managerLogin.body.token
+
+  const organizationResponse = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${managerToken}`)
+    .send({
+      organizationName: 'Acme',
+      teamName: 'Engineering'
+    })
+
+  const teamId = organizationResponse.body.team.id
+
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const userLogin = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const userToken = userLogin.body.token
+
+  const joinRequest = await request(app)
+    .post('/team-join-requests')
+    .set('Authorization', `Bearer ${userToken}`)
+    .send({
+      teamId
+    })
+
+  await request(app)
+    .patch(`/team-join-requests/${joinRequest.body.id}/approve`)
+    .set('Authorization', `Bearer ${managerToken}`)
+
+  const userBeforeDelete = await prisma.user.findUnique({
+    where: {
+      email: 'pablo@test.com'
+    }
+  })
+
+  expect(userBeforeDelete.teamId).toBe(teamId)
+
+  await request(app)
+    .delete(`/teams/${teamId}`)
+    .set('Authorization', `Bearer ${managerToken}`)
+
+  const userAfterDelete = await prisma.user.findUnique({
+    where: {
+      email: 'pablo@test.com'
+    }
+  })
+
+  expect(userAfterDelete.teamId).toBeNull()
+})
+
+it('should reset manager role when deleting a team', async () => {
+
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Manager',
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const loginResponse = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const managerToken = loginResponse.body.token
+
+  const organizationResponse = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${managerToken}`)
+    .send({
+      organizationName: 'Acme',
+      teamName: 'Engineering'
+    })
+
+  const teamId = organizationResponse.body.team.id
+
+  const managerBeforeDelete = await prisma.user.findUnique({
+    where: {
+      email: 'manager@test.com'
+    }
+  })
+
+  expect(managerBeforeDelete.role).toBe('manager')
+  expect(managerBeforeDelete.teamId).toBe(teamId)
+
+  await request(app)
+    .delete(`/teams/${teamId}`)
+    .set('Authorization', `Bearer ${managerToken}`)
+
+  const managerAfterDelete = await prisma.user.findUnique({
+    where: {
+      email: 'manager@test.com'
+    }
+  })
+
+  expect(managerAfterDelete.role).toBe('user')
+  expect(managerAfterDelete.teamId).toBeNull()
+})
+
+it('should remove pending join requests when deleting a team', async () => {
+
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Manager',
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const managerLogin = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const managerToken = managerLogin.body.token
+
+  const organizationResponse = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${managerToken}`)
+    .send({
+      organizationName: 'Acme',
+      teamName: 'Engineering'
+    })
+
+  const teamId = organizationResponse.body.team.id
+
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const userLogin = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const userToken = userLogin.body.token
+
+  const joinRequestResponse = await request(app)
+    .post('/team-join-requests')
+    .set('Authorization', `Bearer ${userToken}`)
+    .send({
+      teamId
+    })
+
+  expect(joinRequestResponse.body.status).toBe('pending')
+
+  await request(app)
+    .delete(`/teams/${teamId}`)
+    .set('Authorization', `Bearer ${managerToken}`)
+
+  const joinRequest = await prisma.teamJoinRequest.findUnique({
+    where: {
+      id: joinRequestResponse.body.id
+    }
+  })
+
+  expect(joinRequest).toBeNull()
+})
+
+
+
 afterAll(async () => {
   await prisma.$disconnect()
 })
