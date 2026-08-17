@@ -3,7 +3,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute'
 import PublicRoute from './components/auth/PublicRoute'
 import Login from './pages/Login'
 import Register from './pages/Register'
-import Profile from './pages/Profile'
+import Dashboard from './pages/Dashboard'
 import Settings from './pages/Settings'
 
 function App() {
@@ -33,12 +33,11 @@ function App() {
             </PublicRoute>
           }
         />
-
         <Route
           path="/profile"
           element={
             <ProtectedRoute>
-              <Profile />
+              <Dashboard />
             </ProtectedRoute>
           }
         />
