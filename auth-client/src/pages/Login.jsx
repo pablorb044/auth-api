@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { login as loginRequest, getProfile } from '../services/auth.api'
+import { saveToken } from '../utils/token'
 import Input from '../components/ui/Input'
 import Button from '../components/ui/Button'
 import AuthForm from '../components/ui/AuthForm'
@@ -18,38 +19,40 @@ function Login() {
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e) => {
-  e.preventDefault()
+    e.preventDefault()
 
-  if (loading) return
+    if (loading) return
 
-  if (!email || !password) {
-  setError('Email y password son obligatorios')
-  return
+    if (!email || !password) {
+      setError('Email y password son obligatorios')
+      return
+    }
+
+    try {
+      setError('')
+      setLoading(true)
+
+      const data = await loginRequest({
+        email,
+        password
+      })
+
+      saveToken(data.token)
+
+      const user = await getProfile()
+
+      await login(user, data.token)
+
+      navigate('/profile')
+    } catch (error) {
+      setError(
+        error.response?.data?.error ||
+        'Error al iniciar sesión'
+      )
+    } finally {
+      setLoading(false)
+    }
   }
-
-  try {
-    setError('')
-    setLoading(true)
-
-    const data = await loginRequest({
-      email,
-      password
-    })
-
-    const user = await getProfile(data.token)
-
-    await login(user, data.token)
-
-    navigate('/profile')
-  } catch (error) {
-    setError(
-      error.response?.data?.error ||
-      'Error al iniciar sesión'
-    )
-  } finally {
-    setLoading(false)
-  }
-}
 
   return (
     <AuthLayout>

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { updateProfile } from '../services/auth.api'
 
-export function useProfile(token, updateUser) {
+export function useProfile(updateUser) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -24,7 +24,7 @@ export function useProfile(token, updateUser) {
       setSuccess('')
       setSaving(true)
 
-      const updatedUser = await updateProfile(token, data)
+      const updatedUser = await updateProfile(data)
 
       updateUser(updatedUser)
       setSuccess('Profile updated successfully')

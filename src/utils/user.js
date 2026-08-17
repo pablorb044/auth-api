@@ -4,6 +4,7 @@ export function sanitizeUser(user) {
     username: user.username,
     email: user.email,
     role: user.role,
+    teamId: user.teamId,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
     isActive: user.isActive

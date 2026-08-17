@@ -10,7 +10,10 @@ import { useAuth } from '../../hooks/useAuth'
 
 function AppLayout({ children }) {
   const navigate = useNavigate()
-  const { logout } = useAuth()
+  const { user, logout } = useAuth()
+
+  const displayName = user?.username || 'User'
+  const avatarLetter = displayName.charAt(0).toUpperCase()
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
@@ -226,11 +229,11 @@ function AppLayout({ children }) {
                   font-semibold
                 "
               >
-                P
+                {avatarLetter}
               </div>
 
               <span className="text-sm text-[var(--text-secondary)]">
-                Pablo
+                {displayName}
               </span>
 
             </div>

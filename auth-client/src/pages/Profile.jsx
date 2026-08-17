@@ -10,8 +10,8 @@ import Input from '../components/ui/Input'
 
 function Profile() {
 
-  const { user, token, logout, updateUser } = useAuth()
-  const { update, saving, error, success } = useProfile(token, updateUser)
+const { user, logout, updateUser } = useAuth()
+const { update, saving, error, success } = useProfile(updateUser)
   const [editing, setEditing] = useState(false)
 
   const [username, setUsername] = useState(user?.username || '')

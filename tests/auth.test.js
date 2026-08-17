@@ -279,6 +279,32 @@ it('should respond to root endpoint', async () => {
   })
 })
 
+it('should return current user', async () => {
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const loginResponse = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const response = await request(app)
+    .get('/auth/me')
+    .set('Authorization', `Bearer ${loginResponse.body.token}`)
+
+  expect(response.status).toBe(200)
+  expect(response.body.username).toBe('Pablo')
+  expect(response.body.email).toBe('pablo@test.com')
+  expect(response.body).toHaveProperty('teamId', null)
+})
+
 afterAll(async () => {
     await prisma.$disconnect()
   })
