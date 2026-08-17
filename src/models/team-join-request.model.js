@@ -52,51 +52,39 @@ export class TeamJoinRequestModel {
     })
   }
 
-  static async updateStatus(id, status) {
+  static async approve(id, userId, teamId) {
+    return prisma.$transaction(async (tx) => {
+      const request = await tx.teamJoinRequest.update({
+        where: {
+          id
+        },
+        data: {
+          status: 'approved'
+        }
+      })
+
+      await tx.user.update({
+        where: {
+          id: userId
+        },
+        data: {
+          teamId
+        }
+      })
+
+      return request
+    })
+  }
+
+  static async reject(id) {
     return prisma.teamJoinRequest.update({
       where: {
         id
       },
       data: {
-        status
+        status: 'rejected'
       }
     })
   }
-
-  static async approve(id, userId, teamId) {
-  return prisma.$transaction(async (tx) => {
-
-    const request = await tx.teamJoinRequest.update({
-      where: {
-        id
-      },
-      data: {
-        status: 'approved'
-      }
-    })
-
-    await tx.user.update({
-      where: {
-        id: userId
-      },
-      data: {
-        teamId
-      }
-    })
-
-    return request
-  })
-}
-
-static async reject(id) {
-  return prisma.teamJoinRequest.update({
-    where: {
-      id
-    },
-    data: {
-      status: 'rejected'
-    }
-  })
-}
 
 }

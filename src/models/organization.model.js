@@ -28,7 +28,6 @@ export class OrganizationModel {
 
   static async createWithTeam({ organizationName, teamName, managerId }) {
     return prisma.$transaction(async (tx) => {
-
       const organization = await tx.organization.create({
         data: {
           name: organizationName
@@ -128,14 +127,14 @@ export class OrganizationModel {
   }
 
   static async update(id, { name }) {
-  return prisma.organization.update({
-    where: {
-      id
-    },
-    data: {
-      name
-    }
-  })
-}
+    return prisma.organization.update({
+      where: {
+        id
+      },
+      data: {
+        name
+      }
+    })
+  }
 
 }

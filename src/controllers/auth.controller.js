@@ -2,114 +2,120 @@ import bcrypt from 'bcrypt'
 import { UserModel } from '../models/user.model.js'
 import { generateToken } from '../utils/jwt.js'
 import { sanitizeUser } from '../utils/user.js'
-import { registerSchema} from '../schemas/register.schema.js'
+import { registerSchema } from '../schemas/register.schema.js'
 import { loginSchema } from '../schemas/login.schema.js'
 import { updateUserSchema } from '../schemas/update-user.schema.js'
 
 export class AuthController {
 
   static async register(req, res) {
-      try {
-        const { username, email, password } = registerSchema.parse(req.body)
+    try {
+      const { username, email, password } = registerSchema.parse(req.body)
 
-        // 1. comprobar si existe usuario
-        const emailExists = await UserModel.existsByEmail(email)
-        if (emailExists) {
-          return res.status(400).json({ error: 'Email already exists' })
-        }
+      const emailExists = await UserModel.existsByEmail(email)
 
-        // 2. hashear password
-        const passwordHash = await bcrypt.hash(password, 10)
-
-        // 3. crear usuario
-        const user = await UserModel.create({
-          username,
-          email,
-          passwordHash
+      if (emailExists) {
+        return res.status(400).json({
+          error: 'Email already exists'
         })
+      }
 
-        // 4. respuesta sin password
-        return res.status(201).json(sanitizeUser(user))
+      const passwordHash = await bcrypt.hash(password, 10)
 
-      } catch (err) {
-          if (err.name === 'ZodError') {
-            return res.status(400).json({
-              errors: err.issues
-            })
-          }
-          if (err.code === 'P2002') {
-            return res.status(400).json({
-              error: 'Email already exists'
-          })
-}
-          console.error(err)
-          return res.status(500).json({
-            error: 'Internal server error'
-          })
-        }
+      const user = await UserModel.create({
+        username,
+        email,
+        passwordHash
+      })
+
+      return res.status(201).json(sanitizeUser(user))
+
+    } catch (err) {
+      if (err.name === 'ZodError') {
+        return res.status(400).json({
+          errors: err.issues
+        })
+      }
+
+      if (err.code === 'P2002') {
+        return res.status(400).json({
+          error: 'Email already exists'
+        })
+      }
+
+      console.error(err)
+
+      return res.status(500).json({
+        error: 'Internal server error'
+      })
+    }
   }
 
   static async login(req, res) {
     try {
       const { email, password } = loginSchema.parse(req.body)
 
-      // 1. buscar usuario
       const user = await UserModel.getByEmail(email)
+
       if (!user) {
-        return res.status(400).json({ error: 'Invalid credentials' })
+        return res.status(400).json({
+          error: 'Invalid credentials'
+        })
       }
 
-      // 2. comparar password
-      const isValid = await bcrypt.compare(password, user.passwordHash)
+      const isValid = await bcrypt.compare(
+        password,
+        user.passwordHash
+      )
+
       if (!isValid) {
-        return res.status(400).json({ error: 'Invalid credentials' })
+        return res.status(400).json({
+          error: 'Invalid credentials'
+        })
       }
 
-      // 3. generar token
       const token = generateToken(user)
 
-      // 4. devolver token
       return res.json({ token })
 
     } catch (err) {
-          if (err.name === 'ZodError') {
-            return res.status(400).json({
-              errors: err.issues
-            })
-          }
+      if (err.name === 'ZodError') {
+        return res.status(400).json({
+          errors: err.issues
+        })
+      }
 
-          return res.status(500).json({
-            error: 'Internal server error'
-          })
-        }
+      return res.status(500).json({
+        error: 'Internal server error'
+      })
+    }
   }
 
   static async me(req, res) {
-  try {
-    const user = await UserModel.getActiveById(req.user.id)
+    try {
+      const user = await UserModel.getActiveById(req.user.id)
 
-    if (!user) {
-      return res.status(401).json({
-        error: 'User is inactive'
+      if (!user) {
+        return res.status(401).json({
+          error: 'User is inactive'
+        })
+      }
+
+      return res.status(200).json(sanitizeUser(user))
+
+    } catch (err) {
+      console.error(err)
+
+      return res.status(500).json({
+        error: 'Internal server error'
       })
     }
-
-    return res.status(200).json(sanitizeUser(user))
-
-  } catch (err) {
-    console.error(err)
-
-    return res.status(500).json({
-      error: 'Internal server error'
-    })
   }
-}
 
   static async updateMe(req, res) {
     try {
       const { username, email } = updateUserSchema.parse(req.body)
 
-      // Comprobar si el nuevo email ya existe
       if (email) {
         const emailExists = await UserModel.existsByEmail(email)
 
@@ -139,12 +145,15 @@ export class AuthController {
           errors: err.issues
         })
       }
+
       if (err.code === 'P2002') {
         return res.status(400).json({
           error: 'Email already exists'
-      })
-}
+        })
+      }
+
       console.error(err)
+
       return res.status(500).json({
         error: 'Internal server error'
       })
