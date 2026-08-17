@@ -37,7 +37,11 @@ function Register() {
       password
     })
 
-    navigate('/login')
+  navigate('/login', {
+    state: {
+      email
+    }
+  })
   } catch (error) {
     setError(
       error.response?.data?.error ||

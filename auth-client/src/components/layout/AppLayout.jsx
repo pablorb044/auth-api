@@ -46,6 +46,7 @@ function AppLayout({ children }) {
         <nav className="flex-1 px-4">
 
           <button
+            onClick={() => navigate('/dashboard')}
             className="
               flex
               w-full
@@ -65,7 +66,51 @@ function AppLayout({ children }) {
             "
           >
             <User size={18} />
-            Profile
+            Dashboard
+          </button>
+
+          <button
+            onClick={() => navigate('/team')}
+            className="
+              mt-2
+              flex
+              w-full
+              items-center
+              gap-3
+              rounded-xl
+              px-4
+              py-3
+              text-sm
+              text-[var(--text-secondary)]
+              transition
+              hover:bg-white/5
+              hover:text-[var(--text-primary)]
+            "
+          >
+            <User size={18} />
+            Team
+          </button>
+
+          <button
+            onClick={() => navigate('/organization')}
+            className="
+              mt-2
+              flex
+              w-full
+              items-center
+              gap-3
+              rounded-xl
+              px-4
+              py-3
+              text-sm
+              text-[var(--text-secondary)]
+              transition
+              hover:bg-white/5
+              hover:text-[var(--text-primary)]
+            "
+          >
+            <User size={18} />
+            Organization
           </button>
 
         </nav>

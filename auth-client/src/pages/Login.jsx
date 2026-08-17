@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { login as loginRequest, getProfile } from '../services/auth.api'
 import { saveToken } from '../utils/token'
@@ -11,9 +11,13 @@ import AuthLayout from '../components/layout/AuthLayout'
 function Login() {
   const navigate = useNavigate()
 
-  const { login } = useAuth()
+  const location = useLocation()
 
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(
+    location.state?.email || ''
+  )
+
+  const { login } = useAuth()
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -43,7 +47,7 @@ function Login() {
 
       await login(user, data.token)
 
-      navigate('/profile')
+    navigate('/dashboard')
     } catch (error) {
       setError(
         error.response?.data?.error ||

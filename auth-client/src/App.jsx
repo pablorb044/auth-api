@@ -5,6 +5,8 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Settings from './pages/Settings'
+import Team from './pages/Team'
+import Organization from './pages/Organization'
 
 function App() {
   return (
@@ -13,7 +15,7 @@ function App() {
 
         <Route
           path="/"
-          element={<Navigate to="/profile" replace />}
+          element={<Navigate to="/dashboard" replace />}
         />
 
         <Route
@@ -34,10 +36,28 @@ function App() {
           }
         />
         <Route
-          path="/profile"
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/team"
+          element={
+            <ProtectedRoute>
+              <Team />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/organization"
+          element={
+            <ProtectedRoute>
+              <Organization />
             </ProtectedRoute>
           }
         />

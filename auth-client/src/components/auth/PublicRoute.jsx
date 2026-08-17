@@ -10,7 +10,7 @@ function PublicRoute({ children }) {
   }
 
   if (user) {
-    return <Navigate to="/profile" replace />
+    return <Navigate to="/dashboard" replace />
   }
 
   return children

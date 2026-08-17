@@ -26,6 +26,8 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
+    let cancelled = false
+
     const loadUser = async () => {
       if (!token) {
         setLoading(false)
@@ -34,15 +36,26 @@ export function AuthProvider({ children }) {
 
       try {
         const user = await getProfile()
-        setUser(user)
+
+        if (!cancelled) {
+          setUser(user)
+        }
       } catch {
-        logout()
+        if (!cancelled) {
+          logout()
+        }
       } finally {
-        setLoading(false)
+        if (!cancelled) {
+          setLoading(false)
+        }
       }
     }
 
     loadUser()
+
+    return () => {
+      cancelled = true
+    }
   }, [token])
 
   return (
