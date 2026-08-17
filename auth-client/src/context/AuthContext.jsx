@@ -1,16 +1,11 @@
-import { createContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { saveToken, getToken, removeToken } from '../utils/token'
 import { getProfile } from '../services/auth.api'
-
-export const AuthContext = createContext()
-
+import { AuthContext } from './AuthContext.js'
 
 export function AuthProvider({ children }) {
-
   const [user, setUser] = useState(null)
-
   const [loading, setLoading] = useState(true)
-
   const [token, setToken] = useState(getToken())
 
   const login = async (userData, jwt) => {
@@ -20,45 +15,35 @@ export function AuthProvider({ children }) {
     setLoading(false)
   }
 
-
   const logout = () => {
-  setUser(null)
-  setToken(null)
-  removeToken()
+    setUser(null)
+    setToken(null)
+    removeToken()
   }
 
   const updateUser = (updatedUser) => {
-  setUser(updatedUser)
+    setUser(updatedUser)
   }
 
   useEffect(() => {
-  const loadUser = async () => {
+    const loadUser = async () => {
+      if (!token) {
+        setLoading(false)
+        return
+      }
 
-    if (!token) {
-      setLoading(false)
-      return
+      try {
+        const user = await getProfile()
+        setUser(user)
+      } catch {
+        logout()
+      } finally {
+        setLoading(false)
+      }
     }
 
-    try {
-
-      const user = await getProfile(token)
-
-      setUser(user)
-
-    } catch (error) {
-
-      logout()
-
-    } finally {
-
-      setLoading(false)
-
-    }
-  }
-
-  loadUser()
-
-}, [token])
+    loadUser()
+  }, [token])
 
   return (
     <AuthContext.Provider

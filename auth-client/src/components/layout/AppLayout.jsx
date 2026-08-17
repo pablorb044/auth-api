@@ -7,7 +7,6 @@ import {
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
-import { useState } from 'react'
 
 function AppLayout({ children }) {
   const navigate = useNavigate()
