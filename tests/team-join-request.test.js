@@ -76,6 +76,93 @@ it('should create a team join request', async () => {
   expect(response.body.status).toBe('pending')
 })
 
+it('should allow a user to request the same team again after leaving', async () => {
+  // Crear manager
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Manager',
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const managerLogin = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'manager@test.com',
+      password: '123456'
+    })
+
+  const managerToken = managerLogin.body.token
+
+  // Crear organización + team
+  const organizationResponse = await request(app)
+    .post('/organizations')
+    .set('Authorization', `Bearer ${managerToken}`)
+    .send({
+      organizationName: 'Acme',
+      teamName: 'Engineering'
+    })
+
+  const teamId = organizationResponse.body.team.id
+
+  // Crear usuario
+  await request(app)
+    .post('/auth/register')
+    .send({
+      username: 'Pablo',
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const userLogin = await request(app)
+    .post('/auth/login')
+    .send({
+      email: 'pablo@test.com',
+      password: '123456'
+    })
+
+  const userToken = userLogin.body.token
+
+  // Primera solicitud
+  const firstRequest = await request(app)
+    .post('/team-join-requests')
+    .set('Authorization', `Bearer ${userToken}`)
+    .send({
+      teamId
+    })
+
+  expect(firstRequest.status).toBe(201)
+  expect(firstRequest.body.status).toBe('pending')
+
+  // Manager aprueba
+  const approveResponse = await request(app)
+    .patch(`/team-join-requests/${firstRequest.body.id}/approve`)
+    .set('Authorization', `Bearer ${managerToken}`)
+
+  expect(approveResponse.status).toBe(200)
+  expect(approveResponse.body.status).toBe('approved')
+
+  // Usuario abandona el Team
+  const leaveResponse = await request(app)
+    .delete(`/teams/${teamId}/members/me`)
+    .set('Authorization', `Bearer ${userToken}`)
+
+  expect(leaveResponse.status).toBe(200)
+
+  // Usuario vuelve a solicitar entrar
+  const secondRequest = await request(app)
+    .post('/team-join-requests')
+    .set('Authorization', `Bearer ${userToken}`)
+    .send({
+      teamId
+    })
+
+  expect(secondRequest.status).toBe(201)
+  expect(secondRequest.body.id).toBe(firstRequest.body.id)
+  expect(secondRequest.body.status).toBe('pending')
+})
+
 it('should reject duplicate pending team join request', async () => {
 
   // Manager

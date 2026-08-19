@@ -8,7 +8,7 @@ http:
   url: http://localhost:3000/team-join-requests
   headers:
     - name: Authorization
-      value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjllMDlmNTNhLTVjNTctNDM3My1hNjMwLTM4YWQ5NjM1MGM1ZSIsImVtYWlsIjoiZW1wbG95ZWUxQHRlc3QuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3ODcxNDQxMzksImV4cCI6MTc4NzE0NzczOX0.9ACEscI8AdcNm7dPAl8w2mlpziQZN1bxeBgHI2v6mJU
+      value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjllMDlmNTNhLTVjNTctNDM3My1hNjMwLTM4YWQ5NjM1MGM1ZSIsImVtYWlsIjoiZW1wbG95ZWUxQHRlc3QuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3ODcxNDU2MjUsImV4cCI6MTc4NzE0OTIyNX0.G3LFzaHKdtm7UtJj1rHW7qlI-wkmHFFfWQmMd9pPlNc
     - name: Content-Type
       value: application/json
   body:

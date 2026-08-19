@@ -8,7 +8,7 @@ http:
   url: http://localhost:3000/team-join-requests
   headers:
     - name: Authorization
-      value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU1ZTkwZWZmLTc3OGYtNDU5Zi1hMzgyLWJhNTU0OTlmZDM4MSIsImVtYWlsIjoibWFuYWdlcjFAdGVzdC5jb20iLCJyb2xlIjoibWFuYWdlciIsImlhdCI6MTc4Njk4MTI2OSwiZXhwIjoxNzg2OTg0ODY5fQ.rxO_EmLI4dcYvc-3ClaA8B1H3635TdMHpTm7dwSsFP0
+      value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZiMTE5NmQ3LTE2ZjQtNDE4NS1iZmI2LWQ2MjVlYmIxZjlhNCIsImVtYWlsIjoibWFuYWdlcjFAdGVzdC5jb20iLCJyb2xlIjoibWFuYWdlciIsImlhdCI6MTc4NzE0NTc2NCwiZXhwIjoxNzg3MTQ5MzY0fQ.t1JlRE-oV3mbTFMa-dKuAVwqFH6KYcKcK6-ljYdzeBA
   params:
     - name: ""
       value: ""

@@ -3,6 +3,33 @@ import { prisma } from '../lib/prisma.js'
 export class TeamJoinRequestModel {
 
   static async create({ userId, teamId }) {
+    const existingRequest = await prisma.teamJoinRequest.findUnique({
+      where: {
+        userId_teamId: {
+          userId,
+          teamId
+        }
+      }
+    })
+
+    if (existingRequest) {
+      if (
+        existingRequest.status === 'approved' ||
+        existingRequest.status === 'rejected'
+      ) {
+        return prisma.teamJoinRequest.update({
+          where: {
+            id: existingRequest.id
+          },
+          data: {
+            status: 'pending'
+          }
+        })
+      }
+
+      return existingRequest
+    }
+
     return prisma.teamJoinRequest.create({
       data: {
         userId,
