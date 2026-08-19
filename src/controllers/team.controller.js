@@ -237,7 +237,7 @@ export class TeamController {
 
       return res.status(200).json({
         message: 'Member role updated successfully',
-        user: updatedUser
+        user: sanitizeUser(updatedUser)
       })
 
     } catch (err) {

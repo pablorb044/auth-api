@@ -73,6 +73,15 @@ export class TeamJoinRequestModel {
         teamId,
         status: 'pending'
       },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            email: true
+          }
+        }
+      },
       orderBy: {
         createdAt: 'asc'
       }
