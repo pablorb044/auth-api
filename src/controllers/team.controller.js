@@ -2,6 +2,7 @@ import { TeamModel } from '../models/team.model.js'
 import { UserModel } from '../models/user.model.js'
 import { updateTeamSchema } from '../schemas/update-team.schema.js'
 import { uuidParamSchema } from '../schemas/uuid-param.schema.js'
+import { sanitizeUser } from '../utils/user.js'
 
 async function getTeamMember(userId, teamId) {
   const user = await UserModel.getById(userId)
@@ -125,10 +126,10 @@ export class TeamController {
 
       const updatedUser = await TeamModel.removeMember(userId)
 
-      return res.status(200).json({
-        message: 'Left team successfully',
-        user: updatedUser
-      })
+    return res.status(200).json({
+      message: 'Left team successfully',
+      user: sanitizeUser(updatedUser)
+    })
 
     } catch (err) {
       console.error(err)
