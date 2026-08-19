@@ -2,9 +2,12 @@ import AppLayout from '../components/layout/AppLayout'
 import Card from '../components/ui/Card'
 import { useDashboard } from '../hooks/useDashboard'
 import {
+  deleteTeam,
   getTeamMembers,
   leaveTeam,
-  updateTeam
+  removeTeamMember,
+  updateTeam,
+  updateTeamMemberRole
 } from '../services/team.api'
 import { useEffect, useState } from 'react'
 import Button from '../components/ui/Button'
@@ -28,10 +31,17 @@ const {
   const [teamName, setTeamName] = useState('')
   const [savingName, setSavingName] = useState(false)
   const [nameError, setNameError] = useState('')
+  const [updatingRole, setUpdatingRole] = useState(false)
+  const [roleError, setRoleError] = useState('')
+  const [membersRefreshKey, setMembersRefreshKey] = useState(0)
+  const [removingMember, setRemovingMember] = useState(false)
+  const [removeError, setRemoveError] = useState('')
+  const [deletingTeam, setDeletingTeam] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
 
   useEffect(() => {
     if (!team?.id) {
-    return
+      return
     }
 
     const loadMembers = async () => {
@@ -52,7 +62,7 @@ const {
     }
 
     loadMembers()
-  }, [team?.id])
+  }, [team?.id, membersRefreshKey])
 
   const errorMessage = dashboardError || error
 
@@ -120,6 +130,85 @@ const {
         setSavingName(false)
       }
     }
+
+    const handleMakeMember = async (memberId) => {
+  if (updatingRole) {
+    return
+  }
+
+  try {
+    setUpdatingRole(true)
+    setRoleError('')
+
+    await updateTeamMemberRole(
+      team.id,
+      memberId,
+      'MEMBER'
+    )
+
+    await refreshDashboard()
+    setMembersRefreshKey((current) => current + 1)
+  } catch (error) {
+    setRoleError(
+      error.response?.data?.error ||
+      'Error updating member role'
+    )
+  } finally {
+    setUpdatingRole(false)
+  }
+}
+
+const handleRemoveMember = async (memberId, username) => {
+  const confirmed = window.confirm(
+    `Are you sure you want to remove ${username} from this Team?`
+  )
+
+  if (!confirmed || removingMember) {
+    return
+  }
+
+  try {
+    setRemovingMember(true)
+    setRemoveError('')
+
+    await removeTeamMember(team.id, memberId)
+
+    setMembersRefreshKey((current) => current + 1)
+  } catch (error) {
+    setRemoveError(
+      error.response?.data?.error ||
+      'Error removing member'
+    )
+  } finally {
+    setRemovingMember(false)
+  }
+}
+
+const handleDeleteTeam = async () => {
+  const confirmed = window.confirm(
+    `Are you sure you want to delete the Team "${team.name}"? This action cannot be undone.`
+  )
+
+  if (!confirmed || deletingTeam) {
+    return
+  }
+
+  try {
+    setDeletingTeam(true)
+    setDeleteError('')
+
+    await deleteTeam(team.id)
+
+    window.location.href = '/dashboard'
+  } catch (error) {
+    setDeleteError(
+      error.response?.data?.error ||
+      'Error deleting the Team'
+    )
+  } finally {
+    setDeletingTeam(false)
+  }
+}
 
   return (
     <AppLayout>
@@ -227,6 +316,27 @@ const {
               </div>
             </div>
           )}
+          {user?.role === 'manager' && (
+            <div className="pt-6">
+              <Button
+                type="button"
+                onClick={handleDeleteTeam}
+                disabled={deletingTeam}
+                className="
+                  bg-red-600/80
+                  hover:bg-red-600
+                "
+              >
+                {deletingTeam ? 'Deleting Team...' : 'Delete Team'}
+              </Button>
+
+              {deleteError && (
+                <p className="mt-2 text-sm text-red-400">
+                  {deleteError}
+                </p>
+              )}
+            </div>
+          )}
             <Card>
               <div className="space-y-2">
                 <p>
@@ -278,6 +388,16 @@ const {
                       : `${members.length} member${members.length === 1 ? '' : 's'}`
                     }
                   </p>
+                  {roleError && (
+                  <p className="mt-2 text-sm text-red-400">
+                    {roleError}
+                  </p>
+                )}
+                {removeError && (
+                  <p className="mt-2 text-sm text-red-400">
+                    {removeError}
+                  </p>
+                )}
                 </div>
 
               <div className="space-y-3">
@@ -330,21 +450,58 @@ const {
                       </div>
                     </div>
 
-                    <span
-                      className="
-                        rounded-full
-                        border
-                        border-white/10
-                        bg-white/5
-                        px-3
-                        py-1
-                        text-xs
-                        font-medium
-                        text-[var(--text-secondary)]
-                      "
-                    >
-                      {member.role}
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <span
+                        className="
+                          rounded-full
+                          border
+                          border-white/10
+                          bg-white/5
+                          px-3
+                          py-1
+                          text-xs
+                          font-medium
+                          text-[var(--text-secondary)]
+                        "
+                      >
+                        {member.role}
+                      </span>
+
+                      {user?.role === 'manager' &&
+                        member.role === 'user' &&
+                        member.id !== user.id && (
+                          <Button
+                            type="button"
+                            onClick={() => handleMakeMember(member.id)}
+                            disabled={updatingRole}
+                            className="w-auto px-3 py-2 text-xs"
+                          >
+                            {updatingRole ? 'Updating...' : 'Make Member'}
+                          </Button>
+                        )}
+                        {user?.role === 'manager' &&
+                          member.id !== user.id && (
+                            <Button
+                              type="button"
+                              onClick={() => handleRemoveMember(
+                                member.id,
+                                member.username
+                              )}
+                              disabled={removingMember}
+                              className="
+                                w-auto
+                                bg-red-500/80
+                                px-3
+                                py-2
+                                text-xs
+                                hover:bg-red-500
+                              "
+                            >
+                              {removingMember ? 'Removing...' : 'Remove'}
+                            </Button>
+                          )}
+                          
+                    </div>
                   </div>
                     ))}
                 </div>

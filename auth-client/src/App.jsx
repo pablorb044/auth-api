@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard'
 import Settings from './pages/Settings'
 import Team from './pages/Team'
 import Organization from './pages/Organization'
+import JoinRequests from './pages/JoinRequests'
 
 function App() {
   return (
@@ -58,6 +59,15 @@ function App() {
           element={
             <ProtectedRoute>
               <Organization />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/join-requests"
+          element={
+            <ProtectedRoute>
+              <JoinRequests />
             </ProtectedRoute>
           }
         />

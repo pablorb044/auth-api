@@ -3,7 +3,8 @@ import {
   Settings,
   LogOut,
   Search,
-  Bell
+  Bell,
+  Mail
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
@@ -90,6 +91,30 @@ function AppLayout({ children }) {
             <User size={18} />
             Team
           </button>
+
+          {user?.role === 'manager' && (
+          <button
+            onClick={() => navigate('/join-requests')}
+            className="
+              mt-2
+              flex
+              w-full
+              items-center
+              gap-3
+              rounded-xl
+              px-4
+              py-3
+              text-sm
+              text-[var(--text-secondary)]
+              transition
+              hover:bg-white/5
+              hover:text-[var(--text-primary)]
+            "
+          >
+            <Mail size={18} />
+            Join Requests
+          </button>
+        )}
 
           <button
             onClick={() => navigate('/organization')}
