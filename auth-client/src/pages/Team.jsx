@@ -1,19 +1,33 @@
 import AppLayout from '../components/layout/AppLayout'
 import Card from '../components/ui/Card'
 import { useDashboard } from '../hooks/useDashboard'
-import { getTeamMembers, leaveTeam } from '../services/team.api'
+import {
+  getTeamMembers,
+  leaveTeam,
+  updateTeam
+} from '../services/team.api'
 import { useEffect, useState } from 'react'
 import Button from '../components/ui/Button'
 
 function Team() {
-  const { user, team, loading: dashboardLoading, error: dashboardError } =
-    useDashboard()
+
+const {
+  user,
+  team,
+  loading: dashboardLoading,
+  error: dashboardError,
+  refreshDashboard
+} = useDashboard()
 
   const [members, setMembers] = useState([])
   const [loadingMembers, setLoadingMembers] = useState(false)
   const [error, setError] = useState('')
   const [leaving, setLeaving] = useState(false)
   const [leaveError, setLeaveError] = useState('')
+  const [editingName, setEditingName] = useState(false)
+  const [teamName, setTeamName] = useState('')
+  const [savingName, setSavingName] = useState(false)
+  const [nameError, setNameError] = useState('')
 
   useEffect(() => {
     if (!team?.id) {
@@ -80,6 +94,33 @@ function Team() {
   }
 }
 
+    const handleUpdateTeam = async (e) => {
+      e.preventDefault()
+
+      if (savingName || !teamName.trim()) {
+        return
+      }
+
+      try {
+        setSavingName(true)
+        setNameError('')
+
+        await updateTeam(team.id, {
+          name: teamName.trim()
+        })
+
+        setEditingName(false)
+        refreshDashboard()
+      } catch (error) {
+        setNameError(
+          error.response?.data?.error ||
+          'Error updating the Team'
+        )
+      } finally {
+        setSavingName(false)
+      }
+    }
+
   return (
     <AppLayout>
       <div className="mx-auto w-full max-w-6xl space-y-6">
@@ -109,6 +150,83 @@ function Team() {
           </Card>
         ) : (
           <>
+
+            {user?.role === 'manager' && (
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm text-[var(--text-secondary)]">
+                  Team name
+                </p>
+
+                {editingName ? (
+                  <form onSubmit={handleUpdateTeam} className="mt-2 flex gap-2">
+                    <input
+                      type="text"
+                      value={teamName}
+                      onChange={(e) => setTeamName(e.target.value)}
+                      minLength={2}
+                      required
+                      className="
+                        rounded-xl
+                        border
+                        border-white/10
+                        bg-white/5
+                        px-3
+                        py-2
+                        text-[var(--text-primary)]
+                        outline-none
+                      "
+                    />
+
+                    <Button
+                      type="submit"
+                      disabled={savingName}
+                      className="w-auto"
+                    >
+                      {savingName ? 'Saving...' : 'Save'}
+                    </Button>
+
+                    <Button
+                      type="button"
+                      disabled={savingName}
+                      onClick={() => {
+                        setEditingName(false)
+                        setTeamName(team.name)
+                        setNameError('')
+                      }}
+                      className="w-auto bg-white/10 hover:bg-white/20"
+                    >
+                      Cancel
+                    </Button>
+                  </form>
+                ) : (
+                  <div className="mt-1 flex items-center gap-3">
+                    <h2 className="text-xl font-semibold">
+                      {team.name}
+                    </h2>
+
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        setTeamName(team.name)
+                        setEditingName(true)
+                        setNameError('')
+                      }}
+                      className="w-auto px-3 py-2 text-sm"
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                )}
+
+                {nameError && (
+                  <p className="mt-2 text-sm text-red-400">
+                    {nameError}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
             <Card>
               <div className="space-y-2">
                 <p>

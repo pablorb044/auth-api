@@ -10,6 +10,7 @@ export function useDashboard() {
   const [organization, setOrganization] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -53,13 +54,18 @@ export function useDashboard() {
     }
 
     loadDashboard()
-  }, [user])
+  }, [user, refreshKey])
+
+  const refreshDashboard = () => {
+    setRefreshKey((current) => current + 1)
+  }
 
   return {
     user,
     team,
     organization,
     loading,
-    error
+    error,
+    refreshDashboard
   }
 }
