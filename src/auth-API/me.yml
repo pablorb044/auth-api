@@ -8,7 +8,7 @@ http:
   url: http://localhost:3000/auth/me
   headers:
     - name: Authorization
-      value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU1OTI2YjdiLTkwMTYtNGE4Yi1hNDVjLTZmMmQ1OTM0MjQyYiIsImVtYWlsIjoicGFibG9AdGVzdC5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc4NTM0MTk5NSwiZXhwIjoxNzg1MzQ1NTk1fQ.bOuVVbcX5nv1HFUo6NW0Q9b2uJUQyrzA3H7xhwzauA4
+      value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEzNDU0ZDEyLWY5ZTAtNDI1Yi1iZGZkLTRlMzA0NzY2NTM0NCIsImVtYWlsIjoiZW1wbG95ZWUxQHRlc3QuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3ODY5ODA3ODUsImV4cCI6MTc4Njk4NDM4NX0.hoJoQ0c4d5b_g2W5ozTzg0G-1GzjlyHt-zRZh7xlpL4
   auth: inherit
 
 settings:

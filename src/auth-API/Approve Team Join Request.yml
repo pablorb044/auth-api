@@ -1,0 +1,18 @@
+info:
+  name: Approve Team Join Request
+  type: http
+  seq: 1
+
+http:
+  method: PATCH
+  url: http://localhost:3000/team-join-requests/8851d43f-7a68-4de6-8403-0e58e02e1502/approve
+  headers:
+    - name: Authorization
+      value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZiMTE5NmQ3LTE2ZjQtNDE4NS1iZmI2LWQ2MjVlYmIxZjlhNCIsImVtYWlsIjoibWFuYWdlcjFAdGVzdC5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc4NzE0NDA0OCwiZXhwIjoxNzg3MTQ3NjQ4fQ.vUxRUJu584RLvylHi42NRr03TfMPDTGt7f-x9VSROJs
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

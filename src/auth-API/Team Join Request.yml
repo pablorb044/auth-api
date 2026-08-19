@@ -1,0 +1,26 @@
+info:
+  name: Team Join Request
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:3000/team-join-requests
+  headers:
+    - name: Authorization
+      value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjllMDlmNTNhLTVjNTctNDM3My1hNjMwLTM4YWQ5NjM1MGM1ZSIsImVtYWlsIjoiZW1wbG95ZWUxQHRlc3QuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3ODcxNDQxMzksImV4cCI6MTc4NzE0NzczOX0.9ACEscI8AdcNm7dPAl8w2mlpziQZN1bxeBgHI2v6mJU
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "teamId": "6d087904-eb39-48f4-89f6-40233df9f290"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,27 @@
+info:
+  name: Organization
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:3000/organizations
+  headers:
+    - name: Authorization
+      value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZiMTE5NmQ3LTE2ZjQtNDE4NS1iZmI2LWQ2MjVlYmIxZjlhNCIsImVtYWlsIjoibWFuYWdlcjFAdGVzdC5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc4NzE0NDA0OCwiZXhwIjoxNzg3MTQ3NjQ4fQ.vUxRUJu584RLvylHi42NRr03TfMPDTGt7f-x9VSROJs
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "organizationName": "Acme",
+        "teamName": "Engineering"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
