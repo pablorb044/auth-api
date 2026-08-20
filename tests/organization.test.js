@@ -5,11 +5,12 @@ import { prisma } from '../src/lib/prisma.js'
 
 describe('Team Join Requests', () => {
 
-  beforeEach(async () => {
-    await prisma.teamJoinRequest.deleteMany()
-    await prisma.team.deleteMany()
-    await prisma.organization.deleteMany()
-    await prisma.user.deleteMany()
+beforeEach(async () => {
+  await prisma.task.deleteMany()
+  await prisma.teamJoinRequest.deleteMany()
+  await prisma.team.deleteMany()
+  await prisma.organization.deleteMany()
+  await prisma.user.deleteMany()
 })
 
 it('should create an organization and team', async () => {

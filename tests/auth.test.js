@@ -5,12 +5,13 @@ import { prisma } from '../src/lib/prisma.js'
 
 describe('Auth API', () => {
 
-  beforeEach(async () => {
+beforeEach(async () => {
+  await prisma.task.deleteMany()
   await prisma.teamJoinRequest.deleteMany()
   await prisma.team.deleteMany()
   await prisma.organization.deleteMany()
   await prisma.user.deleteMany()
-  })
+})
 
   it('should respond to ping', async () => {
   const response = await request(app).get('/ping')

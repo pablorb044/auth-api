@@ -22,6 +22,8 @@ model User {
   managedTeam  Team?    @relation("TeamManager")
 
   joinRequests TeamJoinRequest[]
+
+  assignedTasks Task[] @relation("TaskAssignee")
 }
 
 model Organization {
@@ -46,6 +48,8 @@ model Team {
   members        User[]
 
   joinRequests   TeamJoinRequest[]
+
+  tasks          Task[]
 }
 
 model TeamJoinRequest {
@@ -60,4 +64,18 @@ model TeamJoinRequest {
   team Team @relation(fields: [teamId], references: [id])
 
   @@unique([userId, teamId])
+}
+
+model Task {
+  id           String   @id @default(uuid())
+  title        String
+  description  String?
+  status       String   @default("SENT")
+  teamId       String
+  assignedToId String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  team       Team @relation(fields: [teamId], references: [id])
+  assignedTo User @relation("TaskAssignee", fields: [assignedToId], references: [id])
 }
