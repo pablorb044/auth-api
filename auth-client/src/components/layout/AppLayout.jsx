@@ -4,8 +4,10 @@ import {
   LogOut,
   Search,
   Bell,
-  Mail
+  Mail,
+  CheckSquare
 } from 'lucide-react'
+
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 
@@ -68,6 +70,28 @@ function AppLayout({ children }) {
           >
             <User size={18} />
             Dashboard
+          </button>
+
+          <button
+            onClick={() => navigate('/tasks')}
+            className="
+              mt-2
+              flex
+              w-full
+              items-center
+              gap-3
+              rounded-xl
+              px-4
+              py-3
+              text-sm
+              text-[var(--text-secondary)]
+              transition
+              hover:bg-white/5
+              hover:text-[var(--text-primary)]
+            "
+          >
+            <CheckSquare size={18} />
+            Tasks
           </button>
 
           <button

@@ -8,6 +8,7 @@ import Settings from './pages/Settings'
 import Team from './pages/Team'
 import Organization from './pages/Organization'
 import JoinRequests from './pages/JoinRequests'
+import Tasks from './pages/Tasks'
 
 function App() {
   return (
@@ -41,6 +42,15 @@ function App() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/tasks"
+          element={
+            <ProtectedRoute>
+              <Tasks />
             </ProtectedRoute>
           }
         />
