@@ -6,6 +6,7 @@ import { prisma } from '../src/lib/prisma.js'
 describe('Auth API', () => {
 
 beforeEach(async () => {
+  await prisma.notification.deleteMany()
   await prisma.task.deleteMany()
   await prisma.teamJoinRequest.deleteMany()
   await prisma.team.deleteMany()
@@ -311,3 +312,4 @@ afterAll(async () => {
   })
 
 })
+

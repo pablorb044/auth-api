@@ -6,6 +6,7 @@ import { prisma } from '../src/lib/prisma.js'
 describe('Team Join Requests', () => {
 
 beforeEach(async () => {
+  await prisma.notification.deleteMany()
   await prisma.task.deleteMany()
   await prisma.teamJoinRequest.deleteMany()
   await prisma.team.deleteMany()
@@ -1035,3 +1036,4 @@ it('should reject manager from another team rejecting a join request', async () 
   })
 
 })
+

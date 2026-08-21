@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import AppLayout from '../components/layout/AppLayout'
 import Card from '../components/ui/Card'
 import { useDashboard } from '../hooks/useDashboard'
@@ -12,12 +13,32 @@ function Dashboard() {
     error
   } = useDashboard()
 
+  const [copiedTeamId, setCopiedTeamId] = useState(false)
+
   const taskCounts = {
     SENT: tasks.filter((task) => task.status === 'SENT').length,
     WORKING: tasks.filter((task) => task.status === 'WORKING').length,
     SUBMITTED: tasks.filter((task) => task.status === 'SUBMITTED').length,
     DONE: tasks.filter((task) => task.status === 'DONE').length
   }
+
+  const handleCopyTeamId = async () => {
+  if (!team?.id) {
+    return
+  }
+
+  try {
+    await navigator.clipboard.writeText(team.id)
+
+    setCopiedTeamId(true)
+
+    setTimeout(() => {
+      setCopiedTeamId(false)
+    }, 2000)
+  } catch (error) {
+    console.error('Failed to copy Team ID', error)
+  }
+}
 
   if (loading) {
     return (
@@ -218,12 +239,39 @@ function Dashboard() {
                     {team.manager?.username || 'Unknown'}
                   </p>
 
-                  <p>
-                    <span className="text-[var(--text-secondary)]">
-                      Team ID:
-                    </span>{' '}
-                    {team.id}
-                  </p>
+                    <div>
+                      <p className="text-[var(--text-secondary)]">
+                        Team ID:
+                      </p>
+
+                      <div className="mt-1 flex items-center gap-2">
+                        <code className="break-all text-xs text-[var(--text-primary)]">
+                          {team.id}
+                        </code>
+
+                        <button
+                          type="button"
+                          onClick={handleCopyTeamId}
+                          className="
+                            shrink-0
+                            rounded-lg
+                            border
+                            border-white/10
+                            bg-white/5
+                            px-2
+                            py-1
+                            text-xs
+                            text-[var(--text-secondary)]
+                            transition
+                            hover:bg-white/10
+                            hover:text-[var(--text-primary)]
+                          "
+                          title="Copy Team ID"
+                        >
+                          {copiedTeamId ? 'Copied!' : 'Copy'}
+                        </button>
+                      </div>
+                    </div>
                 </div>
               ) : (
                 <p className="text-sm text-[var(--text-secondary)]">
