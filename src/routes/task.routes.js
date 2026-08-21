@@ -16,6 +16,12 @@ taskRouter.get(
   TaskController.getMyTasks
 )
 
+taskRouter.get(
+  '/teams/:teamId/tasks',
+  authMiddleware,
+  TaskController.getTeamTasks
+)
+
 taskRouter.patch(
   '/tasks/:taskId/status',
   authMiddleware,

@@ -7,9 +7,17 @@ function Dashboard() {
     user,
     team,
     organization,
+    tasks,
     loading,
     error
   } = useDashboard()
+
+  const taskCounts = {
+    SENT: tasks.filter((task) => task.status === 'SENT').length,
+    WORKING: tasks.filter((task) => task.status === 'WORKING').length,
+    SUBMITTED: tasks.filter((task) => task.status === 'SUBMITTED').length,
+    DONE: tasks.filter((task) => task.status === 'DONE').length
+  }
 
   if (loading) {
     return (
@@ -25,7 +33,7 @@ function Dashboard() {
 
   return (
     <AppLayout>
-      <div className="mx-auto w-full max-w-6xl space-y-6">
+      <div className="mx-auto w-full max-w-6xl space-y-8">
 
         <div>
           <p className="text-sm text-[var(--text-secondary)]">
@@ -44,6 +52,90 @@ function Dashboard() {
             </p>
           </Card>
         )}
+
+        <section>
+          <div className="mb-4">
+            <p className="text-sm text-[var(--text-secondary)]">
+              {user?.role === 'manager'
+                ? 'Team Overview'
+                : 'Task Overview'}
+            </p>
+
+            <h2 className="mt-1 text-xl font-semibold">
+              {user?.role === 'manager'
+                ? 'Team Tasks'
+                : 'Your Tasks'}
+            </h2>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+            <Card>
+              <div className="space-y-3">
+                <p className="text-sm text-[var(--text-secondary)]">
+                  Sent
+                </p>
+
+                <p className="text-4xl font-semibold">
+                  {taskCounts.SENT}
+                </p>
+
+                <p className="text-xs text-[var(--text-secondary)]">
+                  Waiting to start
+                </p>
+              </div>
+            </Card>
+
+            <Card>
+              <div className="space-y-3">
+                <p className="text-sm text-[var(--text-secondary)]">
+                  Working
+                </p>
+
+                <p className="text-4xl font-semibold">
+                  {taskCounts.WORKING}
+                </p>
+
+                <p className="text-xs text-[var(--text-secondary)]">
+                  Currently in progress
+                </p>
+              </div>
+            </Card>
+
+            <Card>
+              <div className="space-y-3">
+                <p className="text-sm text-[var(--text-secondary)]">
+                  Submitted
+                </p>
+
+                <p className="text-4xl font-semibold">
+                  {taskCounts.SUBMITTED}
+                </p>
+
+                <p className="text-xs text-[var(--text-secondary)]">
+                  Waiting for review
+                </p>
+              </div>
+            </Card>
+
+            <Card>
+              <div className="space-y-3">
+                <p className="text-sm text-[var(--text-secondary)]">
+                  Done
+                </p>
+
+                <p className="text-4xl font-semibold">
+                  {taskCounts.DONE}
+                </p>
+
+                <p className="text-xs text-[var(--text-secondary)]">
+                  Completed tasks
+                </p>
+              </div>
+            </Card>
+
+          </div>
+        </section>
 
         <div className="grid gap-6 md:grid-cols-2">
 
@@ -142,6 +234,7 @@ function Dashboard() {
           </Card>
 
         </div>
+
       </div>
     </AppLayout>
   )

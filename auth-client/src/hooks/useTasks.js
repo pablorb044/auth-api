@@ -42,8 +42,47 @@ export function useTasks() {
   }, [user])
 
   useEffect(() => {
-    loadTasks()
-  }, [loadTasks])
+    let cancelled = false
+
+    const load = async () => {
+      if (!user) {
+        setTasks([])
+        setLoading(false)
+        return
+      }
+
+      try {
+        setLoading(true)
+        setError('')
+
+        const data =
+          user.role === 'manager' && user.teamId
+            ? await getTeamTasks(user.teamId)
+            : await getMyTasks()
+
+        if (!cancelled) {
+          setTasks(data)
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setError(
+            error.response?.data?.error ||
+            'Error al cargar las tareas'
+          )
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
+      }
+    }
+
+    load()
+
+    return () => {
+      cancelled = true
+    }
+  }, [user])
 
   const changeTaskStatus = async (taskId, status) => {
     try {

@@ -7,23 +7,25 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  username     String
-  email        String   @unique
-  passwordHash String
-  role         String   @default("user")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  isActive     Boolean  @default(true)
+  id            String   @id @default(uuid())
+  username      String
+  email         String   @unique
+  passwordHash  String
+  role          String   @default("user")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  isActive      Boolean  @default(true)
 
-  teamId       String?
-  team         Team?    @relation(fields: [teamId], references: [id])
+  teamId        String?
+  team          Team?    @relation(fields: [teamId], references: [id])
 
-  managedTeam  Team?    @relation("TeamManager")
+  managedTeam   Team?    @relation("TeamManager")
 
-  joinRequests TeamJoinRequest[]
+  joinRequests  TeamJoinRequest[]
 
-  assignedTasks Task[] @relation("TaskAssignee")
+  assignedTasks Task[]   @relation("TaskAssignee")
+
+  notifications Notification[]
 }
 
 model Organization {
@@ -67,15 +69,33 @@ model TeamJoinRequest {
 }
 
 model Task {
-  id           String   @id @default(uuid())
-  title        String
-  description  String?
-  status       String   @default("SENT")
-  teamId       String
-  assignedToId String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String         @id @default(uuid())
+  title         String
+  description   String?
+  status        String         @default("SENT")
+  teamId        String
+  assignedToId  String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
-  team       Team @relation(fields: [teamId], references: [id])
-  assignedTo User @relation("TaskAssignee", fields: [assignedToId], references: [id])
+  team          Team           @relation(fields: [teamId], references: [id])
+  assignedTo    User           @relation("TaskAssignee", fields: [assignedToId], references: [id])
+
+  notifications Notification[]
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  message   String
+  taskId    String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  task Task? @relation(fields: [taskId], references: [id])
+
+  @@index([userId, read])
+  @@index([taskId])
 }

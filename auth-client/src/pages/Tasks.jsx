@@ -115,6 +115,52 @@ function Tasks() {
     return null
   }
 
+  const getStatusStyle = (status) => {
+    switch (status) {
+      case 'SENT':
+        return {
+          label: 'Sent',
+          className:
+            'border-violet-400/20 bg-violet-500/10 text-violet-300'
+        }
+
+      case 'WORKING':
+        return {
+          label: 'Working',
+          className:
+            'border-blue-400/20 bg-blue-500/10 text-blue-300'
+        }
+
+      case 'SUBMITTED':
+        return {
+          label: 'Submitted',
+          className:
+            'border-yellow-400/20 bg-yellow-500/10 text-yellow-300'
+        }
+
+      case 'DONE':
+        return {
+          label: 'Done',
+          className:
+            'border-green-400/20 bg-green-500/10 text-green-300'
+        }
+
+      case 'REJECTED':
+        return {
+          label: 'Rejected',
+          className:
+            'border-red-400/20 bg-red-500/10 text-red-300'
+        }
+
+      default:
+        return {
+          label: status,
+          className:
+            'border-white/10 bg-white/5 text-[var(--text-secondary)]'
+        }
+    }
+  }
+
   return (
     <AppLayout>
       <div className="mx-auto w-full max-w-6xl space-y-6">
@@ -255,22 +301,22 @@ function Tasks() {
                 type="submit"
                 disabled={creating || membersLoading}
                 className="
-  rounded-lg
-  bg-gradient-to-r
-  from-violet-600/80
-  to-purple-600/80
-  px-4
-  py-2
-  text-sm
-  font-medium
-  text-[var(--text-primary)]
-  shadow-lg
-  shadow-violet-900/20
-  transition
-  hover:opacity-90
-  disabled:cursor-not-allowed
-  disabled:opacity-50
-"
+                  rounded-lg
+                  bg-gradient-to-r
+                  from-violet-600/80
+                  to-purple-600/80
+                  px-4
+                  py-2
+                  text-sm
+                  font-medium
+                  text-[var(--text-primary)]
+                  shadow-lg
+                  shadow-violet-900/20
+                  transition
+                  hover:opacity-90
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                "
               >
                 {creating ? 'Creating...' : 'Create task'}
               </button>
@@ -302,12 +348,13 @@ function Tasks() {
           <div className="space-y-4">
             {tasks.map(task => {
               const nextAction = getNextAction(task)
+              const statusStyle = getStatusStyle(task.status)
 
               return (
                 <Card key={task.id}>
                   <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
-                    <div className="space-y-2">
+                    <div className="space-y-3">
 
                       <div>
                         <h2 className="text-lg font-semibold">
@@ -321,14 +368,27 @@ function Tasks() {
                         )}
                       </div>
 
-                      <div className="flex flex-wrap gap-4 text-sm">
+                      <div className="flex flex-wrap items-center gap-4 text-sm">
 
-                        <p>
+                        <div className="flex items-center gap-2">
                           <span className="text-[var(--text-secondary)]">
                             Status:
-                          </span>{' '}
-                          {task.status}
-                        </p>
+                          </span>
+
+                          <span
+                            className={`
+                              rounded-full
+                              border
+                              px-2.5
+                              py-1
+                              text-xs
+                              font-medium
+                              ${statusStyle.className}
+                            `}
+                          >
+                            {statusStyle.label}
+                          </span>
+                        </div>
 
                         {user?.role === 'manager' && (
                           <p>
@@ -349,6 +409,14 @@ function Tasks() {
                         )}
 
                       </div>
+
+                      {user?.role === 'manager' &&
+                        task.status === 'SUBMITTED' && (
+                          <p className="text-xs font-medium text-yellow-300">
+                            This task is waiting for your review.
+                          </p>
+                        )}
+
                     </div>
 
                     {nextAction && (
@@ -362,14 +430,18 @@ function Tasks() {
                         }
                         className="
                           rounded-lg
-                          bg-[var(--text-primary)]
+                          bg-gradient-to-r
+                          from-violet-600/80
+                          to-purple-600/80
                           px-4
                           py-2
                           text-sm
                           font-medium
-                          text-[var(--bg-primary)]
-                          transition-opacity
-                          hover:opacity-80
+                          text-[var(--text-primary)]
+                          shadow-lg
+                          shadow-violet-900/20
+                          transition
+                          hover:opacity-90
                         "
                       >
                         {nextAction.label}

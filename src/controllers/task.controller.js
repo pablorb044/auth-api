@@ -1,6 +1,7 @@
 import { TeamModel } from '../models/team.model.js'
 import { UserModel } from '../models/user.model.js'
 import { TaskModel } from '../models/task.model.js'
+import { NotificationModel } from '../models/notification.model.js'
 import { createTaskSchema } from '../schemas/create-task.schema.js'
 import { uuidParamSchema } from '../schemas/uuid-param.schema.js'
 
@@ -59,6 +60,13 @@ export class TaskController {
         assignedToId
       })
 
+      await NotificationModel.create({
+        userId: assignedToId,
+        type: 'TASK_ASSIGNED',
+        message: `You have been assigned a new task: "${task.title}"`,
+        taskId: task.id
+      })
+
       return res.status(201).json(task)
 
     } catch (err) {
@@ -77,109 +85,162 @@ export class TaskController {
   }
 
   static async getMyTasks(req, res) {
-  try {
-    const tasks = await TaskModel.getByAssignee(req.user.id)
+    try {
+      const tasks = await TaskModel.getByAssignee(req.user.id)
 
-    return res.status(200).json(tasks)
+      return res.status(200).json(tasks)
 
-  } catch (err) {
-    console.error(err)
+    } catch (err) {
+      console.error(err)
 
-    return res.status(500).json({
-      error: 'Internal server error'
-    })
-  }
-}
-
-static async updateStatus(req, res) {
-  try {
-    const { taskId } = req.params
-    const { status } = req.body
-
-    uuidParamSchema.parse({
-      id: taskId
-    })
-
-    const task = await TaskModel.getById(taskId)
-
-    if (!task) {
-      return res.status(404).json({
-        error: 'Task not found'
+      return res.status(500).json({
+        error: 'Internal server error'
       })
     }
+  }
 
-    const userId = req.user.id
-    const isManager = task.team.managerId === userId
+  static async updateStatus(req, res) {
+    try {
+      const { taskId } = req.params
+      const { status } = req.body
 
-    // MANAGER → SUBMITTED → DONE
-    if (isManager) {
-      if (
-        task.status !== 'SUBMITTED' ||
-        status !== 'DONE'
-      ) {
-        return res.status(400).json({
-          error: 'Invalid task status transition'
+      uuidParamSchema.parse({
+        id: taskId
+      })
+
+      const task = await TaskModel.getById(taskId)
+
+      if (!task) {
+        return res.status(404).json({
+          error: 'Task not found'
         })
       }
 
-      const updatedTask = await TaskModel.updateStatus(
-        taskId,
-        status
-      )
+      const userId = req.user.id
+      const isManager = task.team.managerId === userId
 
-      return res.status(200).json(updatedTask)
-    }
+      if (isManager) {
+        if (
+          task.status !== 'SUBMITTED' ||
+          status !== 'DONE'
+        ) {
+          return res.status(400).json({
+            error: 'Invalid task status transition'
+          })
+        }
 
-    // MEMBER → solo puede modificar sus propias tareas
-    if (task.assignedToId !== userId) {
-      return res.status(403).json({
-        error: 'Only the assigned user can update the task status'
-      })
-    }
+        const updatedTask = await TaskModel.updateStatus(
+          taskId,
+          status
+        )
 
-    // MEMBER → SENT → WORKING
-    if (
-      task.status === 'SENT' &&
-      status === 'WORKING'
-    ) {
-      const updatedTask = await TaskModel.updateStatus(
-        taskId,
-        status
-      )
+        await NotificationModel.create({
+          userId: task.assignedToId,
+          type: 'TASK_COMPLETED',
+          message: `Your task has been completed: "${task.title}"`,
+          taskId: task.id
+        })
 
-      return res.status(200).json(updatedTask)
-    }
+        return res.status(200).json(updatedTask)
+      }
 
-    // MEMBER → WORKING → SUBMITTED
-    if (
-      task.status === 'WORKING' &&
-      status === 'SUBMITTED'
-    ) {
-      const updatedTask = await TaskModel.updateStatus(
-        taskId,
-        status
-      )
+      if (task.assignedToId !== userId) {
+        return res.status(403).json({
+          error: 'Only the assigned user can update the task status'
+        })
+      }
 
-      return res.status(200).json(updatedTask)
-    }
+      if (
+        task.status === 'SENT' &&
+        status === 'WORKING'
+      ) {
+        const updatedTask = await TaskModel.updateStatus(
+          taskId,
+          status
+        )
 
-    return res.status(400).json({
-      error: 'Invalid task status transition'
-    })
+        return res.status(200).json(updatedTask)
+      }
 
-  } catch (err) {
-    if (err.name === 'ZodError') {
+      if (
+        task.status === 'WORKING' &&
+        status === 'SUBMITTED'
+      ) {
+        const updatedTask = await TaskModel.updateStatus(
+          taskId,
+          status
+        )
+
+        await NotificationModel.create({
+          userId: task.team.managerId,
+          type: 'TASK_SUBMITTED',
+          message: `${task.assignedTo.username} submitted "${task.title}"`,
+          taskId: task.id
+        })
+
+        return res.status(200).json(updatedTask)
+      }
+
       return res.status(400).json({
-        errors: err.issues
+        error: 'Invalid task status transition'
+      })
+
+    } catch (err) {
+      if (err.name === 'ZodError') {
+        return res.status(400).json({
+          errors: err.issues
+        })
+      }
+
+      console.error(err)
+
+      return res.status(500).json({
+        error: 'Internal server error'
       })
     }
-
-    console.error(err)
-
-    return res.status(500).json({
-      error: 'Internal server error'
-    })
   }
-}
+
+  static async getTeamTasks(req, res) {
+    try {
+      const { teamId } = req.params
+
+      uuidParamSchema.parse({
+        id: teamId
+      })
+
+      const managerId = req.user.id
+
+      const team = await TeamModel.getById(teamId)
+
+      if (!team) {
+        return res.status(404).json({
+          error: 'Team not found'
+        })
+      }
+
+      if (team.managerId !== managerId) {
+        return res.status(403).json({
+          error: 'Only the team manager can view team tasks'
+        })
+      }
+
+      const tasks = await TaskModel.getByTeam(teamId)
+
+      return res.status(200).json(tasks)
+
+    } catch (err) {
+      if (err.name === 'ZodError') {
+        return res.status(400).json({
+          errors: err.issues
+        })
+      }
+
+      console.error(err)
+
+      return res.status(500).json({
+        error: 'Internal server error'
+      })
+    }
+  }
 
 }

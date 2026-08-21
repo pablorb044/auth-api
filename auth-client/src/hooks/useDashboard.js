@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react'
 import { useAuth } from './useAuth'
 import { getTeam } from '../services/team.api'
 import { getOrganization } from '../services/organization.api'
-import { getMyTasks } from '../services/task.api'
+import {
+  getMyTasks,
+  getTeamTasks
+} from '../services/task.api'
 
 export function useDashboard() {
   const { user } = useAuth()
@@ -47,7 +50,11 @@ export function useDashboard() {
           setOrganization(null)
         }
 
-        const tasksData = await getMyTasks()
+        const tasksData =
+          user.role === 'manager'
+            ? await getTeamTasks(user.teamId)
+            : await getMyTasks()
+
         setTasks(tasksData)
 
       } catch (error) {
